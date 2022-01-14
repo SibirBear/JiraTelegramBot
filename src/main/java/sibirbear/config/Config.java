@@ -6,11 +6,12 @@ import java.util.Properties;
 
 public class Config {
 
-    private ConfigTelegramSettings configTelegramSettings;
+    private static ConfigTelegramSettings configTelegramSettings;
+    private static String authJira;
     private static Config config;
 
     private static Config read(Properties properties) {
-        Config config = new Config();
+
         try(InputStream is = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
             properties.load(is);
         } catch (IOException e) {
@@ -18,7 +19,8 @@ public class Config {
         }
         String token = properties.getProperty("TOKEN");
         String botName = properties.getProperty("BOTNAME");
-        config.configTelegramSettings = new ConfigTelegramSettings(token, botName);
+        authJira = properties.getProperty("AUTHJIRA");
+        configTelegramSettings = new ConfigTelegramSettings(token, botName);
 
         return config;
     }
@@ -29,7 +31,12 @@ public class Config {
         return config;
     }
 
-    public ConfigTelegramSettings getConfigTelegramSettings() {
+    public static ConfigTelegramSettings getConfigTelegramSettings() {
         return configTelegramSettings;
     }
+
+    public static String getAuthJira() {
+        return authJira;
+    }
+
 }

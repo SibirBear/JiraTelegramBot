@@ -11,8 +11,8 @@ import sibirbear.config.Config;
 
 public class CoreBot extends TelegramLongPollingBot {
 
-    private final String token = Config.init().getConfigTelegramSettings().getToken();
-    private final String botName = Config.init().getConfigTelegramSettings().getBotName();
+    private final String token = Config.getConfigTelegramSettings().getToken();
+    private final String botName = Config.getConfigTelegramSettings().getBotName();
 
     @Override
     public void onUpdateReceived(Update update) {
