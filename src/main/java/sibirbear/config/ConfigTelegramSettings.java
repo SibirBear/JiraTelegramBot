@@ -5,7 +5,7 @@ public class ConfigTelegramSettings {
     private String token;
     private String botName;
 
-    public ConfigTelegramSettings(String token, String botName) {
+    public ConfigTelegramSettings(final String token, final String botName) {
         this.token = token;
         this.botName = botName;
     }
