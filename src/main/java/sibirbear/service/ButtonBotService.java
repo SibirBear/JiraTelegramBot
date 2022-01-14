@@ -10,7 +10,7 @@ import java.util.List;
  * Сервис для конфигурации кнопок в сообщениях бота
  */
 
-public class ButtonService {
+public class ButtonBotService {
 
     public List<List<InlineKeyboardButton>> createInlineButton (String buttonName) {
         List<List<InlineKeyboardButton>> inlineKeyboardButtonList= new ArrayList<>();
