@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import sibirbear.config.Config;
 import sibirbear.service.SendMessageBotService;
+import sibirbear.service.SendMessageConstantText;
 
 import java.io.Serializable;
 
@@ -30,6 +31,8 @@ public class CoreBot extends TelegramLongPollingBot {
             switch (update.getMessage().getText()) {
                 case START:
                     executeMessage(sendMessageBotService.startMessage(update));
+                    executeMessage(sendMessageBotService.authtorizationMessage(update));
+
                     break;
             }
         }

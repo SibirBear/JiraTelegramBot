@@ -5,10 +5,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class SendMessageBotService {
 
-    public SendMessage startMessage(Update update) {
-        return createSimpleMessage(update, SendMessageConstantText.GREETINGS.getText());
-    }
-
     private SendMessage createSimpleMessage(Update update, String text) {
         SendMessage sendMessage = new SendMessage();
 
@@ -16,6 +12,14 @@ public class SendMessageBotService {
         sendMessage.setText(text);
 
         return sendMessage;
+    }
+
+    public SendMessage startMessage(Update update) {
+        return createSimpleMessage(update, SendMessageConstantText.GREETINGS.getText());
+    }
+
+    public SendMessage authtorizationMessage(Update update) {
+        return createSimpleMessage(update, SendMessageConstantText.AUTH.getText());
     }
 
 }
