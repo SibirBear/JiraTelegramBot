@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/*
+ * Класс чтения и установки параметров конфигурации
+ */
+
 public class Config {
 
     private static ConfigTelegramSettings configTelegramSettings;

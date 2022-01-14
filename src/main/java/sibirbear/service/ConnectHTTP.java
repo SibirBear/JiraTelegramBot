@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/*
+ * Класс для установки и закрытия HTTP-соединения
+ */
+
 public class ConnectHTTP {
 
     private String url;
