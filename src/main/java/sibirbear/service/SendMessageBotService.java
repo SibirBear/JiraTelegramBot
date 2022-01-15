@@ -5,7 +5,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class SendMessageBotService {
 
-    private SendMessage createSimpleMessage(Update update, String text) {
+    private SendMessage createSimpleMessage(long chatId, String text) {
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText(text);
+
+        return sendMessage;
+    }
+
+    //заглушка
+    public SendMessage mess(Update update, String text) {
         SendMessage sendMessage = new SendMessage();
 
         sendMessage.setChatId(String.valueOf(update.getMessage().getChatId()));
@@ -14,12 +24,12 @@ public class SendMessageBotService {
         return sendMessage;
     }
 
-    public SendMessage startMessage(Update update) {
-        return createSimpleMessage(update, SendMessageConstantText.GREETINGS.getText());
+    public SendMessage startMessage(long chatId) {
+        return createSimpleMessage(chatId, SendMessageConstantText.GREETINGS.getText());
     }
 
-    public SendMessage authtorizationMessage(Update update) {
-        return createSimpleMessage(update, SendMessageConstantText.AUTH.getText());
+    public SendMessage authtorizationMessage(long chatId) {
+        return createSimpleMessage(chatId, SendMessageConstantText.AUTH.getText());
     }
 
 }

@@ -1,5 +1,6 @@
 package sibirbear.store;
 
+import sibirbear.model.Steps;
 import sibirbear.model.User;
 
 import java.util.HashMap;
@@ -17,5 +18,10 @@ public class StoreUser implements IStoreUser{
     @Override
     public User getUser(long chatId) {
         return storeUser.get(chatId);
+    }
+
+    @Override
+    public boolean containsUser(long chatId) {
+        return storeUser.containsKey(chatId);
     }
 }

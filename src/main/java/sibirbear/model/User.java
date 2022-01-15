@@ -10,17 +10,17 @@ import java.time.LocalDate;
 
 public class User {
 
-    private String userName;
+    private long userName;
     private LocalDate date;
     private Steps step;
 
-    public User(final String userName, final LocalDate date, final Steps step) {
+    public User(final long userName, final LocalDate date, final Steps step) {
         this.userName = userName;
         this.date = date;
         this.step = step;
     }
 
-    public String getUserName() {
+    public long getUserName() {
         return userName;
     }
 
@@ -30,6 +30,14 @@ public class User {
 
     public Steps getStep() {
         return step;
+    }
+
+    public void updateDate(LocalDate localDate) {
+        this.date = localDate;
+    }
+
+    public void updateStep(Steps step) {
+        this.step = step;
     }
 
 }

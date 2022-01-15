@@ -8,4 +8,6 @@ public interface IStoreUser {
 
     User getUser(long chatId);
 
+    boolean containsUser(long chatId);
+
 }
