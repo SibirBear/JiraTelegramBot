@@ -13,6 +13,7 @@ public class Config {
     private static ConfigTelegramSettings configTelegramSettings;
     private static String authJira;
     private static Config config;
+    private static String urlUser;
 
     private static Config read(Properties properties) {
 
@@ -24,6 +25,7 @@ public class Config {
         String token = properties.getProperty("TOKEN");
         String botName = properties.getProperty("BOTNAME");
         authJira = properties.getProperty("AUTHJIRA");
+        urlUser = properties.getProperty("URLUSER");
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
 
         return config;
@@ -41,6 +43,10 @@ public class Config {
 
     public static String getAuthJira() {
         return authJira;
+    }
+
+    public static String getUrlUser() {
+        return urlUser;
     }
 
 }
