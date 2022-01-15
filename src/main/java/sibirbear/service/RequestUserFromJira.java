@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 
 public class RequestUserFromJira {
 
-    public static int findUserJira(String user) {
+    public static int findUserJira(final String user) {
         int responseUser = 404;
         HttpURLConnection http;
         String url = Config.getUrlUser() + user;

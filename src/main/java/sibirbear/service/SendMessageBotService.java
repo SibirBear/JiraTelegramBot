@@ -28,8 +28,13 @@ public class SendMessageBotService {
         return createSimpleMessage(chatId, SendMessageConstantText.GREETINGS.getText());
     }
 
-    public SendMessage authtorizationMessage(long chatId) {
+    public SendMessage authorizationMessageBefore(long chatId) {
         return createSimpleMessage(chatId, SendMessageConstantText.AUTH.getText());
+    }
+    
+    public SendMessage authorizationMessageAfter(long chatId, boolean result) {
+        return result ? createSimpleMessage(chatId, SendMessageConstantText.AUTH_OK.getText())
+                : createSimpleMessage(chatId, SendMessageConstantText.AUTH_ERROR.getText());
     }
 
 }

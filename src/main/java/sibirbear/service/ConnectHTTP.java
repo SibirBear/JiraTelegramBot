@@ -12,8 +12,8 @@ import java.net.URL;
 
 public class ConnectHTTP {
 
-    private String url;
-    private TypeRequestHTTP typeRequestHTTP;
+    private final String url;
+    private final TypeRequestHTTP typeRequestHTTP;
     private final String HTTP_PROPERTY_CONTENT = "Content-Type";
     private final String HTTP_PROPERTY_CONTENT_TYPE = "application/json";
     private final String HTTP_PROPERTY_AUTH = "Authorization";

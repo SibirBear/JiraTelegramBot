@@ -14,6 +14,7 @@ import sibirbear.store.StoreUser;
 
 import java.time.LocalDate;
 
+import static sibirbear.core.CoreConstants.HTTP_OK;
 import static sibirbear.core.CoreConstants.START;
 
 
@@ -41,7 +42,7 @@ public class CoreBot extends TelegramLongPollingBot {
     private void scenarioSteps(Update update) {
         long userChatId = update.getMessage().getChatId();
         if (!storeUser.containsUser(userChatId)) {
-            executeMessage(sendMessageBotService.authtorizationMessage(userChatId));
+            executeMessage(sendMessageBotService.authorizationMessageBefore(userChatId));
             storeUser.saveUser(userChatId, new User(userChatId, LocalDate.now(), Steps.STEP1));
         } else {
             Steps currentStep = storeUser.getUser(userChatId).getStep();
@@ -51,13 +52,12 @@ public class CoreBot extends TelegramLongPollingBot {
                     String loginUser = update.getMessage().getText();
                     int result = RequestUserFromJira.findUserJira(loginUser);
 
-                    if (result == 200) {
-                        executeMessage(sendMessageBotService.mess(update, "Верно!"));
+                    if (result == HTTP_OK) {
+                        executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,true));
                         storeUser.getUser(userChatId).updateStep(Steps.STEP2);
                     } else {
-                        executeMessage(sendMessageBotService.mess(update, "ОШИБКА! Повторите ввод."));
+                        executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,false));
                     }
-
                     break;
                 case STEP2:
                     executeMessage(sendMessageBotService.mess(update, "Пока все. Кодим дальше :)"));
