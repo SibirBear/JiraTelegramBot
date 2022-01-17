@@ -7,6 +7,7 @@ package sibirbear.model;
 public enum Steps {
 
     STEP1, //Авторизация
-    STEP2 //Запрос создания заявки
+    STEP2, //Запрос создания заявки
+    STEP3 //Ответ на запрос создания заявки
 
 }

@@ -1,9 +1,15 @@
 package sibirbear.service;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+
+import static java.lang.Math.toIntExact;
 
 public class SendMessageBotService {
+
+    private final ButtonBotService buttonBotService = new ButtonBotService();
 
     private SendMessage createSimpleMessage(long chatId, String text) {
         SendMessage sendMessage = new SendMessage();
@@ -14,14 +20,15 @@ public class SendMessageBotService {
         return sendMessage;
     }
 
-    //заглушка
-    public SendMessage mess(Update update, String text) {
-        SendMessage sendMessage = new SendMessage();
+    private EditMessageText createSimpleEditMessage(Update update, String answer) {
+        EditMessageText editMessageText = new EditMessageText();
+        long mesId = update.getCallbackQuery().getMessage().getMessageId();
+        long chatId = update.getCallbackQuery().getMessage().getChatId();
+        editMessageText.setMessageId(toIntExact(mesId));
+        editMessageText.setChatId(String.valueOf(chatId));
+        editMessageText.setText(answer);
 
-        sendMessage.setChatId(String.valueOf(update.getMessage().getChatId()));
-        sendMessage.setText(text);
-
-        return sendMessage;
+        return editMessageText;
     }
 
     public SendMessage startMessage(long chatId) {
@@ -35,6 +42,20 @@ public class SendMessageBotService {
     public SendMessage authorizationMessageAfter(long chatId, boolean result) {
         return result ? createSimpleMessage(chatId, SendMessageConstantText.AUTH_OK.getText())
                 : createSimpleMessage(chatId, SendMessageConstantText.AUTH_ERROR.getText());
+    }
+
+    public SendMessage desireCreateRequestJira(long chatId) {
+        SendMessage sendMessage = createSimpleMessage(chatId,SendMessageConstantText.DESIRECREATEREQUEST.getText());
+        InlineKeyboardMarkup replyKeyboardMarkup =
+                buttonBotService.setInlineKeyboard(buttonBotService.
+                        createInlineButton(ButtonBotServiceTitle.YES.getTitle()));
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        return sendMessage;
+    }
+
+    public EditMessageText desireCreateRequestJiraAnswer(Update update) {
+        return createSimpleEditMessage(update, SendMessageConstantText.DESIRECREATEREQUEST.getText()
+                + "\n" + ButtonBotServiceTitle.YES.getTitle());
     }
 
 }

@@ -2,6 +2,7 @@ package sibirbear.core;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -13,9 +14,9 @@ import sibirbear.service.SendMessageBotService;
 import sibirbear.store.StoreUser;
 
 import java.time.LocalDate;
+import java.util.Locale;
 
-import static sibirbear.core.CoreConstants.HTTP_OK;
-import static sibirbear.core.CoreConstants.START;
+import static sibirbear.core.CoreConstants.*;
 
 
 /*
@@ -35,11 +36,16 @@ public class CoreBot extends TelegramLongPollingBot {
             if (START.equals(update.getMessage().getText())) {
                 executeMessage(sendMessageBotService.startMessage(update.getMessage().getChatId()));
             }
-            scenarioSteps(update);
+            scenarioStepsText(update);
         }
+
+        if (update.hasCallbackQuery()) {
+            scenarioStepsQuery(update);
+        }
+
     }
 
-    private void scenarioSteps(Update update) {
+    private void scenarioStepsText(Update update) {
         long userChatId = update.getMessage().getChatId();
         if (!storeUser.containsUser(userChatId)) {
             executeMessage(sendMessageBotService.authorizationMessageBefore(userChatId));
@@ -50,23 +56,52 @@ public class CoreBot extends TelegramLongPollingBot {
             switch (currentStep) {
                 case STEP1:
                     String loginUser = update.getMessage().getText();
-                    int result = RequestUserFromJira.findUserJira(loginUser);
+                    int result = RequestUserFromJira.findUserJira(loginUser.toLowerCase(Locale.ROOT));
 
                     if (result == HTTP_OK) {
                         executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,true));
                         storeUser.getUser(userChatId).updateStep(Steps.STEP2);
+                        executeMessage(sendMessageBotService.desireCreateRequestJira(userChatId));
                     } else {
                         executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,false));
                     }
                     break;
+
                 case STEP2:
-                    executeMessage(sendMessageBotService.mess(update, "Пока все. Кодим дальше :)"));
+                    //executeMessage(sendMessageBotService.desireCreateRequestJira(userChatId)); //переместить в шаг 1
+                    //storeUser.getUser(userChatId).updateStep(Steps.STEP3);
+                    break;
+
+                case STEP3:
+                    //обрабатывать отдельно, заменять на вопрос и ответ
+                    //executeMessage(sendMessageBotService.mess(update, "Шаг 3 завершен"));
                     break;
             }
         }
     }
 
-    private void executeMessage(SendMessage sendMessage) { //private <T extends BotApiMethod>
+    private void scenarioStepsQuery(Update update) {
+        long userChatId = update.getCallbackQuery().getMessage().getChatId();
+        String callBackQuery = update.getCallbackQuery().getData();
+
+        //Добавить проверку на истекшую дату авторизации
+
+       if (YES.equals(callBackQuery)) {
+           executeMessage(sendMessageBotService.desireCreateRequestJiraAnswer(update));
+
+       }
+
+    }
+
+    private void executeMessage(SendMessage sendMessage) {
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void executeMessage(EditMessageText sendMessage) {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
