@@ -62,7 +62,7 @@ public class CoreBot extends TelegramLongPollingBot {
             switch (currentStep) {
                 case STEP1:
                     String loginUser = update.getMessage().getText();
-                    executeMessage(sendMessageBotService.message(userChatId, "Проверяю..."));
+                    executeMessage(sendMessageBotService.checkMessage(userChatId));
                     int result = RequestUserFromJira.findUserJira(loginUser.toLowerCase(Locale.ROOT));
 
                     if (result == HTTP_OK) {

@@ -17,13 +17,14 @@ public class App {
 
     public static void main(String[] args) {
         Config.init();
-        System.out.println("start");
 
         TelegramBotsApi botsApi;
         try {
             botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new CoreBot());
-            System.out.println("start2");
+
+            System.out.println("Bot starting...");
+
         } catch (TelegramApiException e) {
             //log.error("Error starting app. " + e.getStackTrace());
             System.out.println("ERROR: " + e.getMessage());

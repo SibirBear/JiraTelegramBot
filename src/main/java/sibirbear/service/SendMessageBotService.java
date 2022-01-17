@@ -39,6 +39,10 @@ public class SendMessageBotService {
     public SendMessage authorizationMessageBefore(long chatId) {
         return createSimpleMessage(chatId, SendMessageConstantText.AUTH.getText());
     }
+
+    public SendMessage checkMessage(long chatId) {
+        return createSimpleMessage(chatId, SendMessageConstantText.CHECK.getText());
+    }
     
     public SendMessage authorizationMessageAfter(long chatId, boolean result) {
         return result ? createSimpleMessage(chatId, SendMessageConstantText.AUTH_OK.getText())
@@ -54,18 +58,12 @@ public class SendMessageBotService {
         return sendMessage;
     }
 
+    /*
+     * Варианты ответов для сообщений с интерактивными кнопками
+     */
     public EditMessageText desireCreateRequestJiraAnswer(Update update) {
         return createSimpleEditMessage(update, SendMessageConstantText.DESIRECREATEREQUEST.getText()
                 + "\n" + ButtonBotServiceTitle.YES.getTitle());
-    }
-
-    public SendMessage message(long chatId, String text) {
-        SendMessage sendMessage = new SendMessage();
-
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(text);
-
-        return sendMessage;
     }
 
 }
