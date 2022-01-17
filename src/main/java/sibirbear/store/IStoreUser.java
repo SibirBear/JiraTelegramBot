@@ -10,4 +10,6 @@ public interface IStoreUser {
 
     boolean containsUser(long chatId);
 
+    void deleteUser(long chatId);
+
 }

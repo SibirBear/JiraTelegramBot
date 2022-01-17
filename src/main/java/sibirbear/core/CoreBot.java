@@ -47,19 +47,27 @@ public class CoreBot extends TelegramLongPollingBot {
 
     private void scenarioStepsText(Update update) {
         long userChatId = update.getMessage().getChatId();
+
+
+        if (storeUser.getUser(userChatId) != null && storeUser.getUser(userChatId).isDateExpired()) {
+            storeUser.deleteUser(userChatId);
+        }
+
         if (!storeUser.containsUser(userChatId)) {
             executeMessage(sendMessageBotService.authorizationMessageBefore(userChatId));
-            storeUser.saveUser(userChatId, new User(userChatId, LocalDate.now(), Steps.STEP1));
+            storeUser.saveUser(userChatId, new User("not authorization", Steps.STEP1));
         } else {
             Steps currentStep = storeUser.getUser(userChatId).getStep();
 
             switch (currentStep) {
                 case STEP1:
                     String loginUser = update.getMessage().getText();
+                    executeMessage(sendMessageBotService.message(userChatId, "Проверяю..."));
                     int result = RequestUserFromJira.findUserJira(loginUser.toLowerCase(Locale.ROOT));
 
                     if (result == HTTP_OK) {
                         executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,true));
+                        storeUser.getUser(userChatId).setUserName(loginUser);
                         storeUser.getUser(userChatId).updateStep(Steps.STEP2);
                         executeMessage(sendMessageBotService.desireCreateRequestJira(userChatId));
                     } else {
@@ -81,10 +89,7 @@ public class CoreBot extends TelegramLongPollingBot {
     }
 
     private void scenarioStepsQuery(Update update) {
-        long userChatId = update.getCallbackQuery().getMessage().getChatId();
         String callBackQuery = update.getCallbackQuery().getData();
-
-        //Добавить проверку на истекшую дату авторизации
 
        if (YES.equals(callBackQuery)) {
            executeMessage(sendMessageBotService.desireCreateRequestJiraAnswer(update));

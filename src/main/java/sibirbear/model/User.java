@@ -10,18 +10,24 @@ import java.time.LocalDate;
 
 public class User {
 
-    private long userName;
-    private LocalDate date;
+    private String userName;
+    private final LocalDate date;
     private Steps step;
+    private final LocalDate expiredDate;
 
-    public User(final long userName, final LocalDate date, final Steps step) {
+    public User(final String userName, final Steps step) {
         this.userName = userName;
-        this.date = date;
+        this.date = LocalDate.now();
         this.step = step;
+        this.expiredDate = date.minusDays(8);
     }
 
-    public long getUserName() {
+    public String getUserName() {
         return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public LocalDate getDate() {
@@ -32,12 +38,12 @@ public class User {
         return step;
     }
 
-    public void updateDate(LocalDate localDate) {
-        this.date = localDate;
-    }
-
     public void updateStep(Steps step) {
         this.step = step;
+    }
+
+    public boolean isDateExpired() {
+        return LocalDate.now().isBefore(expiredDate);
     }
 
 }

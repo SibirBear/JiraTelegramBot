@@ -24,4 +24,9 @@ public class StoreUser implements IStoreUser{
     public boolean containsUser(long chatId) {
         return storeUser.containsKey(chatId);
     }
+
+    @Override
+    public void deleteUser(long chatId) {
+        storeUser.remove(chatId);
+    }
 }

@@ -26,6 +26,7 @@ public class SendMessageBotService {
         long chatId = update.getCallbackQuery().getMessage().getChatId();
         editMessageText.setMessageId(toIntExact(mesId));
         editMessageText.setChatId(String.valueOf(chatId));
+        //editMessageText.enableMarkdown(true); //для стилизации
         editMessageText.setText(answer);
 
         return editMessageText;
@@ -56,6 +57,15 @@ public class SendMessageBotService {
     public EditMessageText desireCreateRequestJiraAnswer(Update update) {
         return createSimpleEditMessage(update, SendMessageConstantText.DESIRECREATEREQUEST.getText()
                 + "\n" + ButtonBotServiceTitle.YES.getTitle());
+    }
+
+    public SendMessage message(long chatId, String text) {
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText(text);
+
+        return sendMessage;
     }
 
 }
