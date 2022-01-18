@@ -46,4 +46,13 @@ public class User {
         return LocalDate.now().isBefore(expiredDate);
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", date=" + date +
+                ", step=" + step +
+                ", expiredDate=" + expiredDate +
+                '}';
+    }
 }

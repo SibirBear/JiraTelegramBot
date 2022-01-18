@@ -1,16 +1,16 @@
 package sibirbear.service;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-
-import static java.lang.Math.toIntExact;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import sibirbear.store.StoreUser;
 
 public class SendMessageBotService {
 
     private final ButtonBotService buttonBotService = new ButtonBotService();
 
+/*
+ * Конструкторы сообщений
+ */
     private SendMessage createSimpleMessage(long chatId, String text) {
         SendMessage sendMessage = new SendMessage();
 
@@ -20,18 +20,16 @@ public class SendMessageBotService {
         return sendMessage;
     }
 
-    private EditMessageText createSimpleEditMessage(Update update, String answer) {
-        EditMessageText editMessageText = new EditMessageText();
-        long mesId = update.getCallbackQuery().getMessage().getMessageId();
-        long chatId = update.getCallbackQuery().getMessage().getChatId();
-        editMessageText.setMessageId(toIntExact(mesId));
-        editMessageText.setChatId(String.valueOf(chatId));
-        //editMessageText.enableMarkdown(true); //для стилизации
-        editMessageText.setText(answer);
-
-        return editMessageText;
+    private SendMessage createMessageWithKeyboard(long chatId, String text, ReplyKeyboardMarkup keyboard) {
+        SendMessage message = createSimpleMessage(chatId, text);
+        message.setReplyMarkup(keyboard);
+        return  message;
     }
 
+
+/*
+ * Простые сообщения
+ */
     public SendMessage startMessage(long chatId) {
         return createSimpleMessage(chatId, SendMessageConstantText.GREETINGS.getText());
     }
@@ -49,21 +47,21 @@ public class SendMessageBotService {
                 : createSimpleMessage(chatId, SendMessageConstantText.AUTH_ERROR.getText());
     }
 
-    public SendMessage desireCreateRequestJira(long chatId) {
-        SendMessage sendMessage = createSimpleMessage(chatId,SendMessageConstantText.DESIRECREATEREQUEST.getText());
-        InlineKeyboardMarkup replyKeyboardMarkup =
-                buttonBotService.setInlineKeyboard(buttonBotService.
-                        createInlineButton(ButtonBotServiceTitle.YES.getTitle()));
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        return sendMessage;
+    public SendMessage createIssueMessage(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.DESIRECREATEISSUE.getText(),
+                buttonBotService.createIssueMessage());
     }
 
-    /*
-     * Варианты ответов для сообщений с интерактивными кнопками
-     */
-    public EditMessageText desireCreateRequestJiraAnswer(Update update) {
-        return createSimpleEditMessage(update, SendMessageConstantText.DESIRECREATEREQUEST.getText()
-                + "\n" + ButtonBotServiceTitle.YES.getTitle());
+    public SendMessage chooseTypeIssueMessage(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.CHOOSETYPEISSUE.getText(),
+                buttonBotService.chooseTypeIssueMessage());
+    }
+
+    //DELETE after Test
+    public SendMessage abc(long chatId, StoreUser store) {
+        return createSimpleMessage(chatId, store.getUser(chatId).toString());
     }
 
 }

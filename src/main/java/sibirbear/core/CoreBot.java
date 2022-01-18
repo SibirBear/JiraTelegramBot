@@ -2,18 +2,17 @@ package sibirbear.core;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import sibirbear.config.Config;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
+import sibirbear.service.ButtonsNameConstants;
 import sibirbear.service.RequestUserFromJira;
 import sibirbear.service.SendMessageBotService;
 import sibirbear.store.StoreUser;
 
-import java.time.LocalDate;
 import java.util.Locale;
 
 import static sibirbear.core.CoreConstants.*;
@@ -36,16 +35,16 @@ public class CoreBot extends TelegramLongPollingBot {
             if (START.equals(update.getMessage().getText())) {
                 executeMessage(sendMessageBotService.startMessage(update.getMessage().getChatId()));
             }
-            scenarioStepsText(update);
+            scenarioMessageText(update);
         }
 
         if (update.hasCallbackQuery()) {
-            scenarioStepsQuery(update);
+            scenarioCallbackQuery(update);
         }
 
     }
 
-    private void scenarioStepsText(Update update) {
+    private void scenarioMessageText(Update update) {
         long userChatId = update.getMessage().getChatId();
 
 
@@ -60,6 +59,8 @@ public class CoreBot extends TelegramLongPollingBot {
             Steps currentStep = storeUser.getUser(userChatId).getStep();
 
             switch (currentStep) {
+
+                //Авторизация
                 case STEP1:
                     String loginUser = update.getMessage().getText();
                     executeMessage(sendMessageBotService.checkMessage(userChatId));
@@ -69,44 +70,39 @@ public class CoreBot extends TelegramLongPollingBot {
                         executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,true));
                         storeUser.getUser(userChatId).setUserName(loginUser);
                         storeUser.getUser(userChatId).updateStep(Steps.STEP2);
-                        executeMessage(sendMessageBotService.desireCreateRequestJira(userChatId));
+
+                        //DELETE after test
+                        executeMessage(sendMessageBotService.abc(userChatId, storeUser));
+                        //DELETE after test
+
+                        executeMessage(sendMessageBotService.createIssueMessage(userChatId));
                     } else {
                         executeMessage(sendMessageBotService.authorizationMessageAfter(userChatId,false));
                     }
                     break;
 
+                //Запрос создания заявки
                 case STEP2:
-                    //executeMessage(sendMessageBotService.desireCreateRequestJira(userChatId)); //переместить в шаг 1
-                    //storeUser.getUser(userChatId).updateStep(Steps.STEP3);
+                    if (ButtonsNameConstants.CREATE_ISSUE.equals(update.getMessage().getText())) {
+                        executeMessage(sendMessageBotService.chooseTypeIssueMessage(userChatId));
+                    }
+
                     break;
 
                 case STEP3:
-                    //обрабатывать отдельно, заменять на вопрос и ответ
-                    //executeMessage(sendMessageBotService.mess(update, "Шаг 3 завершен"));
-                    break;
+
             }
         }
     }
 
-    private void scenarioStepsQuery(Update update) {
+    private void scenarioCallbackQuery(Update update) {
+        long userChatId = update.getCallbackQuery().getMessage().getChatId();
         String callBackQuery = update.getCallbackQuery().getData();
-
-       if (YES.equals(callBackQuery)) {
-           executeMessage(sendMessageBotService.desireCreateRequestJiraAnswer(update));
-
-       }
+        Steps currentStep = storeUser.getUser(userChatId).getStep();
 
     }
 
     private void executeMessage(SendMessage sendMessage) {
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void executeMessage(EditMessageText sendMessage) {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
