@@ -1,5 +1,6 @@
 package sibirbear.config;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,22 +11,25 @@ import java.util.Properties;
 
 public class Config {
 
+    public static final String APP_NAME = "JiraTelegramBot";
+    private static final String CONFIG_PATH = "projects-configs/";
+
     private static ConfigTelegramSettings configTelegramSettings;
-    private static String authJira;
     private static Config config;
-    private static String urlUser;
+    private static String urlJira;
+    private static String pathToExchange;
 
     private static Config read(Properties properties) {
 
-        try(InputStream is = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try(InputStream is = new FileInputStream(CONFIG_PATH + APP_NAME + "/config.properties")) {
             properties.load(is);
         } catch (IOException e) {
             e.printStackTrace();
         }
         String token = properties.getProperty("TOKEN");
         String botName = properties.getProperty("BOTNAME");
-        authJira = properties.getProperty("AUTHJIRA");
-        urlUser = properties.getProperty("URLUSER");
+        urlJira = properties.getProperty("URL_JIRA");
+        pathToExchange = properties.getProperty("PATH_TO_EXCHANGE");
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
 
         return config;
@@ -41,12 +45,12 @@ public class Config {
         return configTelegramSettings;
     }
 
-    public static String getAuthJira() {
-        return authJira;
+
+    public static String getUrlJira() {
+        return urlJira;
     }
 
-    public static String getUrlUser() {
-        return urlUser;
+    public static String getPathToExchange() {
+        return pathToExchange;
     }
-
 }
