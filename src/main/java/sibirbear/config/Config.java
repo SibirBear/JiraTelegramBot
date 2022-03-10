@@ -16,6 +16,7 @@ public class Config {
 
     private static ConfigTelegramSettings configTelegramSettings;
     private static Config config;
+    private static String authJira;
     private static String urlJira;
     private static String pathToExchange;
 
@@ -28,6 +29,7 @@ public class Config {
         }
         String token = properties.getProperty("TOKEN");
         String botName = properties.getProperty("BOTNAME");
+        authJira = properties.getProperty("AUTH_JIRA");
         urlJira = properties.getProperty("URL_JIRA");
         pathToExchange = properties.getProperty("PATH_TO_EXCHANGE");
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
@@ -45,6 +47,9 @@ public class Config {
         return configTelegramSettings;
     }
 
+    public static String getAuthJira() {
+        return authJira;
+    }
 
     public static String getUrlJira() {
         return urlJira;
