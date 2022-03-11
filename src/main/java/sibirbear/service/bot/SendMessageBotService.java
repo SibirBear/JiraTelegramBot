@@ -1,6 +1,7 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import static sibirbear.service.bot.SendMessageBuilder.*;
 
@@ -39,8 +40,17 @@ public class SendMessageBotService {
         return message;
     }
 
+    public SendMessage listOfIssues(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.RETURNTOPRIMARYMENU_BUTTON.getText(),
+                buttonBotService.returnToPrimaryMenuButtonMessage());
+    }
 
+    public SendMessage returnToPrimaryMenu(long chatId) {
+        SendMessage message = createSimpleMessage(chatId, SendMessageConstantText.RETURNTOPRIMARYMENU_ACTION.getText());
+        message.setReplyMarkup(new ReplyKeyboardRemove(true));
+        return message;
+    }
 
-    //ReplyKeyboardRemove rkm = new ReplyKeyboardRemove(true);
 
 }

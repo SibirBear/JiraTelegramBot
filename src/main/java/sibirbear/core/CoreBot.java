@@ -12,7 +12,9 @@ import sibirbear.model.User;
 import sibirbear.service.RequestUserFromJira;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
-import sibirbear.store.StoreUser;
+import sibirbear.service.bot.SendMessageBuilder;
+import sibirbear.store.StoreOrders;
+import sibirbear.store.StoreUsers;
 
 import java.util.Locale;
 
@@ -28,7 +30,8 @@ public class CoreBot extends TelegramLongPollingBot {
     private final String token = Config.getConfigTelegramSettings().getToken();
     private final String botName = Config.getConfigTelegramSettings().getBotName();
     private final SendMessageBotService sendMessageBotService = new SendMessageBotService();
-    private final StoreUser storeUser = new StoreUser();
+    private final StoreUsers storeUser = new StoreUsers();
+    private final StoreOrders storeOrders = new StoreOrders();
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -49,17 +52,17 @@ public class CoreBot extends TelegramLongPollingBot {
         long userChatId = update.getMessage().getChatId();
 
         //проверка, что пользователь сохранен в списке пользователей и не "старый"
-        if (storeUser.getUser(userChatId) != null && storeUser.getUser(userChatId).isDateExpired()) {
-            storeUser.deleteUser(userChatId);
+        if (storeUser.get(userChatId) != null && storeUser.get(userChatId).isDateExpired()) {
+            storeUser.delete(userChatId);
         }
 
         //если пользователя нет в списке пользователей - записываем chat ID с признаком не авторизовавшегося
         // пользователя и отправляем запрос на авторизацию (точнее сообщаем пользователю чтобы он ввел логин)
-        if (!storeUser.containsUser(userChatId)) {
+        if (!storeUser.contains(userChatId)) {
             executeMessage(sendMessageBotService.authorizationLoginMessage(userChatId));
-            storeUser.saveUser(userChatId, new User("not authorization", Steps.STEP100));
+            storeUser.save(userChatId, new User("not authorization", Steps.STEP100));
         } else {
-            Steps currentStep = storeUser.getUser(userChatId).getStep();
+            Steps currentStep = storeUser.get(userChatId).getStep();
 
             switch (currentStep) {
 
@@ -75,31 +78,39 @@ public class CoreBot extends TelegramLongPollingBot {
                     //------------------------------
 
                     if (result == HTTP_OK) {
-                        storeUser.getUser(userChatId).setUserName(loginUser);
-                        storeUser.getUser(userChatId).updateStep(Steps.STEP101);
+                        storeUser.get(userChatId).setUserName(loginUser);
+                        storeUser.get(userChatId).updateStep(Steps.STEP101);
                         executeMessage(sendMessageBotService.authorizationLoginResultMessage(userChatId,true));
                         executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
                     } else {
                         executeMessage(sendMessageBotService.authorizationLoginResultMessage(userChatId,false));
-                    };
+                    }
                     break;
 
-                //Меню
+                //Отработка кнопок меню
                 case STEP101:
                     if (ButtonsNameConstants.CREATE_ISSUE.equals(update.getMessage().getText())) {
-                        storeUser.getUser(userChatId).updateStep(Steps.STEP102);
+                        storeUser.get(userChatId).updateStep(Steps.STEP120);
                         executeMessage(sendMessageBotService.chooseTypeIssueMessage(userChatId));
                     }
 
                     if (ButtonsNameConstants.LIST_ISSUES.equals(update.getMessage().getText())) {
-                        storeUser.getUser(userChatId).updateStep(Steps.STEP102);
-                        executeMessage(sendMessageBotService.chooseTypeIssueMessage(userChatId));
+                        storeUser.get(userChatId).updateStep(Steps.STEP999);
+                        executeMessage(sendMessageBotService.listOfIssues(userChatId));
                     }
 
                     break;
 
-                case STEP102:
+                // Отмена действия
+                case STEP998:
+                    storeOrders.delete(userChatId);
 
+                // Возврат в меню
+                case STEP999:
+                    storeUser.get(userChatId).updateStep(Steps.STEP101);
+                    executeMessage(sendMessageBotService.returnToPrimaryMenu(userChatId));
+                    executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
+                    break;
 
             }
         }
@@ -108,7 +119,7 @@ public class CoreBot extends TelegramLongPollingBot {
     private void scenarioCallbackQuery(Update update) {
         long userChatId = update.getCallbackQuery().getMessage().getChatId();
         String callBackQuery = update.getCallbackQuery().getData();
-        Steps currentStep = storeUser.getUser(userChatId).getStep();
+        Steps currentStep = storeUser.get(userChatId).getStep();
 
 
     }

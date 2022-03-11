@@ -2,8 +2,10 @@ package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static sibirbear.service.bot.ButtonBuilder.*;
 
@@ -19,8 +21,8 @@ public class ButtonBotService {
     public ReplyKeyboardMarkup primaryMenuButtonsMessage() {
         return setKeyboardMessage(
                 createRowButtonList(
-                        createRowButtons(Arrays.asList(ButtonsNameConstants.CREATE_ISSUE)),
-                        createRowButtons(Arrays.asList(ButtonsNameConstants.LIST_ISSUES))));
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.CREATE_ISSUE)),
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.LIST_ISSUES))));
     }
 
     public ReplyKeyboardMarkup chooseTypeIssueMessage() {
@@ -29,6 +31,12 @@ public class ButtonBotService {
                         createRowButtons(Arrays.asList(ButtonsNameConstants.IT, ButtonsNameConstants.ONEC)),
                         createRowButtons(Arrays.asList(ButtonsNameConstants.GOODS, ButtonsNameConstants.REPAIR))));
 
+    }
+
+    public ReplyKeyboardMarkup returnToPrimaryMenuButtonMessage() {
+        return setKeyboardMessage(
+                createRowButtonList(
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.RETURNTOMENU))));
     }
 
 
