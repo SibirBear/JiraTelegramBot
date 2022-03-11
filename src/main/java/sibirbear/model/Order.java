@@ -1,7 +1,18 @@
 package sibirbear.model;
 
 /*
- * Модель для хранения данных, которые будут использованы для создания заявки в Jira
+ * Модель для хранения данных, которые будут использованы для создания заявки в Jira.
+ * Параметры:
+ *  project - id проекта;
+ *  reporter - автор issue;
+ *  issueType - id issue;
+ *  nameOrder - название issue;
+ *  description - описание issue;
+ *  contact - контактная информация для связи по issue;
+ *  department - подразделение, на которое распространяется issue;
+ *  attachment - названия файлов в "обменнике" для прикрепления к issue;
+ *  isCreated - признак, что issue по указанным параметрам создан в Jira;
+ *
  */
 
 import java.util.ArrayList;
