@@ -7,6 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import sibirbear.config.Config;
+import sibirbear.jiraAPI.JiraConstants;
+import sibirbear.model.Order;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
 import sibirbear.service.RequestUserFromJira;
@@ -98,6 +100,36 @@ public class CoreBot extends TelegramLongPollingBot {
                         storeUser.get(userChatId).updateStep(Steps.STEP999);
                         executeMessage(sendMessageBotService.listOfIssues(userChatId));
                     }
+
+                    break;
+
+                // Создание заявки. Выбор проекта
+                case STEP120:
+                    String enteredText = update.getMessage().getText();
+
+                    String project = JiraConstants.PROJECT_FRANCH;
+                    String issueType = JiraConstants.ISSUE_TYPE_REGULAR;
+
+                    if (ButtonsNameConstants.IT.equals(enteredText)) {
+                        project = JiraConstants.PROJECT_SUPPORT;
+                    }
+                    if (ButtonsNameConstants.GOODS.equals(enteredText)) {
+                        issueType = JiraConstants.ISSUE_TYPE_CREATE_GOODS;
+                    }
+                    if (ButtonsNameConstants.REPAIR.equals(enteredText)) {
+                        issueType = JiraConstants.ISSUE_TYPE_REPAIR;
+                    }
+
+                    storeOrders.save(userChatId, new Order(project, storeUser.get(userChatId).getUserName()));
+                    storeOrders.get(userChatId).setIssueType(issueType);
+
+                    storeUser.get(userChatId).updateStep(Steps.STEP121);
+                    executeMessage(sendMessageBotService.writeNameIssue(userChatId));
+
+                    break;
+
+                // Создание заявки. Название заявки
+                case STEP121:
 
                     break;
 
