@@ -22,7 +22,7 @@ public class Order {
     private final String project;
     private final String reporter;
     private String issueType;
-    private String nameOrder;
+    private String nameIssue;
     private String description;
     private String contact;
     private String department;
@@ -52,12 +52,12 @@ public class Order {
         return reporter;
     }
 
-    public String getNameOrder() {
-        return nameOrder;
+    public String getNameIssue() {
+        return nameIssue;
     }
 
-    public void setNameOrder(String nameOrder) {
-        this.nameOrder = nameOrder;
+    public void setNameIssue(String nameIssue) {
+        this.nameIssue = nameIssue;
     }
 
     public String getDescription() {
@@ -106,7 +106,7 @@ public class Order {
                 "project='" + project + '\'' +
                 ", reporter='" + reporter + '\'' +
                 ", issueType='" + issueType + '\'' +
-                ", nameOrder='" + nameOrder + '\'' +
+                ", nameOrder='" + nameIssue + '\'' +
                 ", description='" + description + '\'' +
                 ", contact='" + contact + '\'' +
                 ", department='" + department + '\'' +
