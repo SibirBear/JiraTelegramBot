@@ -46,10 +46,14 @@ public class SendMessageBotService {
                 buttonBotService.returnToPrimaryMenuButtonMessage());
     }
 
+    public SendMessage writeNameIssue(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.ENTERISSUENAME.getText());
+    }
+
     public SendMessage returnToPrimaryMenu(long chatId) {
-        SendMessage message = createSimpleMessage(chatId, SendMessageConstantText.RETURNTOPRIMARYMENU_ACTION.getText());
-        message.setReplyMarkup(new ReplyKeyboardRemove(true));
-        return message;
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.RETURNTOPRIMARYMENU_ACTION.getText());
     }
 
 
