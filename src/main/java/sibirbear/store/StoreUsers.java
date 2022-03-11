@@ -1,6 +1,5 @@
 package sibirbear.store;
 
-import sibirbear.model.Order;
 import sibirbear.model.User;
 
 import java.util.HashMap;

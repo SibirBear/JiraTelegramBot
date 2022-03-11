@@ -11,8 +11,7 @@ package sibirbear.model;
  *  contact - контактная информация для связи по issue;
  *  department - подразделение, на которое распространяется issue;
  *  attachment - названия файлов в "обменнике" для прикрепления к issue;
- *  isCreated - признак, что issue по указанным параметрам создан в Jira;
- *
+ *  isCreated - признак, что issue по указанным параметрам создан в Jira; *
  */
 
 import java.util.ArrayList;
@@ -99,5 +98,20 @@ public class Order {
 
     public void setCreated(boolean created) {
         isCreated = created;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "project='" + project + '\'' +
+                ", reporter='" + reporter + '\'' +
+                ", issueType='" + issueType + '\'' +
+                ", nameOrder='" + nameOrder + '\'' +
+                ", description='" + description + '\'' +
+                ", contact='" + contact + '\'' +
+                ", department='" + department + '\'' +
+                ", attachment=" + attachment +
+                ", isCreated=" + isCreated +
+                '}';
     }
 }
