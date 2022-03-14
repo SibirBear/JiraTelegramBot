@@ -33,6 +33,12 @@ public class ButtonBotService {
 
     }
 
+    public ReplyKeyboardMarkup checkEnteredTextButtonMessage() {
+        return setKeyboardMessage(
+                createRowButtonList(
+                        createRowButtons(Arrays.asList(ButtonsNameConstants.NO, ButtonsNameConstants.YES))));
+    }
+
     public ReplyKeyboardMarkup returnToPrimaryMenuButtonMessage() {
         return setKeyboardMessage(
                 createRowButtonList(

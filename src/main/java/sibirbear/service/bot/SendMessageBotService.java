@@ -1,7 +1,6 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import static sibirbear.service.bot.SendMessageBuilder.*;
 
@@ -51,10 +50,15 @@ public class SendMessageBotService {
                 SendMessageConstantText.ENTERISSUENAME.getText());
     }
 
+    public SendMessage messageChooseYesOrNo(long userChatId, String enteredText) {
+        return createMessageWithKeyboard(userChatId,
+                SendMessageConstantText.CHECKENTERTEXT.getText() + enteredText,
+                buttonBotService.checkEnteredTextButtonMessage());
+    }
+
     public SendMessage returnToPrimaryMenu(long chatId) {
         return createSimpleMessageDeleteKeyboard(chatId,
                 SendMessageConstantText.RETURNTOPRIMARYMENU_ACTION.getText());
     }
-
 
 }

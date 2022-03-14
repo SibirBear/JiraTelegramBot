@@ -9,6 +9,9 @@ public class ButtonsNameConstants {
     public static final String ONEC = "1С";
     public static final String GOODS = "Номенклатура";
 
+    public static final String YES = "ДА";
+    public static final String NO = "НЕТ";
+
     public static final String RETURNTOMENU = "Возврат в\nглавное меню";
 
 }

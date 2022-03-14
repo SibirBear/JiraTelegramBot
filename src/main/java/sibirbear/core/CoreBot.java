@@ -19,6 +19,7 @@ import sibirbear.store.StoreOrders;
 import sibirbear.store.StoreUsers;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import static sibirbear.core.CoreConstants.*;
 
@@ -130,8 +131,24 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Название заявки
                 case STEP121:
+                    String nameIssue = update.getMessage().getText();
+                    if (storeOrders.get(userChatId).getNameIssue() != null
+                            || !Objects.equals(storeOrders.get(userChatId).getNameIssue(), "")) {
+                        if (CoreConstants.YES.equals(nameIssue)) {
+                            storeUser.get(userChatId).updateStep(Steps.STEP122);
+                        } else {
+                            executeMessage(sendMessageBotService.writeNameIssue(userChatId));
+                        }
+                    } else {
+                        //вы ввели... верно? да/нет
+                        storeOrders.get(userChatId).setNameIssue(nameIssue);
+                        executeMessage(sendMessageBotService.messageChooseYesOrNo(userChatId, nameIssue));
+                    }
 
                     break;
+
+                // Создание заявки. Описание
+                case STEP122:
 
                 // Отмена действия
                 case STEP998:
