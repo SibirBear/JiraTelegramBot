@@ -39,6 +39,12 @@ public class ButtonBotService {
                         createRowButtons(Arrays.asList(ButtonsNameConstants.NO, ButtonsNameConstants.YES))));
     }
 
+    public ReplyKeyboardMarkup cancelButton() {
+        return setKeyboardMessage(
+                createRowButtonList(
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.CANCEL))));
+    }
+
     public ReplyKeyboardMarkup returnToPrimaryMenuButtonMessage() {
         return setKeyboardMessage(
                 createRowButtonList(
