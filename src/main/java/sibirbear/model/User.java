@@ -30,10 +30,6 @@ public class User {
         this.userName = userName;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
     public Steps getStep() {
         return step;
     }

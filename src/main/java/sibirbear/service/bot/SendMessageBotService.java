@@ -27,13 +27,13 @@ public class SendMessageBotService {
 
     public SendMessage primaryMenuMessage(long chatId) {
         return createMessageWithKeyboard(chatId,
-                SendMessageConstantText.DESIRECREATEISSUE.getText(),
+                SendMessageConstantText.DESIRE_CREATE_ISSUE.getText(),
                 buttonBotService.primaryMenuButtonsMessage());
     }
 
     public SendMessage chooseTypeIssueMessage(long chatId) {
         SendMessage message = createMessageWithKeyboard(chatId,
-                SendMessageConstantText.CHOOSETYPEISSUE.getText(),
+                SendMessageConstantText.CHOOSE_TYPE_ISSUE.getText(),
                 buttonBotService.chooseTypeIssueMessage());
         message.enableMarkdown(true);
         return message;
@@ -41,24 +41,42 @@ public class SendMessageBotService {
 
     public SendMessage listOfIssues(long chatId) {
         return createMessageWithKeyboard(chatId,
-                SendMessageConstantText.RETURNTOPRIMARYMENU_BUTTON.getText(),
+                SendMessageConstantText.RETURN_TO_PRIMARY_MENU_BUTTON.getText(),
                 buttonBotService.returnToPrimaryMenuButtonMessage());
     }
 
     public SendMessage writeNameIssue(long chatId) {
         return createSimpleMessageDeleteKeyboard(chatId,
-                SendMessageConstantText.ENTERISSUENAME.getText());
+                SendMessageConstantText.ENTER_ISSUE_NAME.getText());
     }
 
-    public SendMessage messageChooseYesOrNo(long userChatId, String enteredText) {
-        return createMessageWithKeyboard(userChatId,
-                SendMessageConstantText.CHECKENTERTEXT.getText() + enteredText,
+    public SendMessage messageChooseYesOrNo(long chatId, String enteredText) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.CHECK_ENTER_TEXT.getText() + enteredText,
                 buttonBotService.checkEnteredTextButtonMessage());
+    }
+
+    public SendMessage writeDescriptionIssue(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ENTER_DESCRIPTION_ISSUE.getText(),
+                buttonBotService.cancelButton());
+    }
+
+    public SendMessage messageUserContacts(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ENTER_CONTACTS.getText(),
+                buttonBotService.cancelButton());
+    }
+
+    public SendMessage messageEnterAnyDeskID(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ENTER_ANYDESK_ID.getText(),
+                buttonBotService.cancelButton());
     }
 
     public SendMessage returnToPrimaryMenu(long chatId) {
         return createSimpleMessageDeleteKeyboard(chatId,
-                SendMessageConstantText.RETURNTOPRIMARYMENU_ACTION.getText());
+                SendMessageConstantText.RETURN_TO_PRIMARY_MENU_ACTION.getText());
     }
 
 }

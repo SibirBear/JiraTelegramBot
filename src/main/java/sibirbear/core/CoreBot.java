@@ -53,6 +53,7 @@ public class CoreBot extends TelegramLongPollingBot {
 
     private void scenarioMessageText(Update update) {
         long userChatId = update.getMessage().getChatId();
+        String userEnteredText = update.getMessage().getText();
 
         //проверка, что пользователь сохранен в списке пользователей и не "старый"
         if (storeUser.get(userChatId) != null && storeUser.get(userChatId).isDateExpired()) {
@@ -65,6 +66,11 @@ public class CoreBot extends TelegramLongPollingBot {
             executeMessage(sendMessageBotService.authorizationLoginMessage(userChatId));
             storeUser.save(userChatId, new User("not authorization", Steps.STEP100));
         } else {
+            // Проверка на нажатие кнопки ОТМЕНА в процессе создания заявки
+            if (CoreConstants.CANCEL.equals(userEnteredText)) {
+                storeUser.get(userChatId).updateStep(Steps.STEP997);
+            }
+
             Steps currentStep = storeUser.get(userChatId).getStep();
 
             switch (currentStep) {
@@ -106,18 +112,16 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Выбор проекта
                 case STEP120:
-                    String enteredText = update.getMessage().getText();
-
                     String project = JiraConstants.PROJECT_FRANCH;
                     String issueType = JiraConstants.ISSUE_TYPE_REGULAR;
 
-                    if (ButtonsNameConstants.IT.equals(enteredText)) {
+                    if (ButtonsNameConstants.IT.equals(userEnteredText)) {
                         project = JiraConstants.PROJECT_SUPPORT;
                     }
-                    if (ButtonsNameConstants.GOODS.equals(enteredText)) {
+                    if (ButtonsNameConstants.GOODS.equals(userEnteredText)) {
                         issueType = JiraConstants.ISSUE_TYPE_CREATE_GOODS;
                     }
-                    if (ButtonsNameConstants.REPAIR.equals(enteredText)) {
+                    if (ButtonsNameConstants.REPAIR.equals(userEnteredText)) {
                         issueType = JiraConstants.ISSUE_TYPE_REPAIR;
                     }
 
@@ -131,24 +135,59 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Название заявки
                 case STEP121:
-                    String nameIssue = update.getMessage().getText();
                     if (storeOrders.get(userChatId).getNameIssue() != null
                             || !Objects.equals(storeOrders.get(userChatId).getNameIssue(), "")) {
-                        if (CoreConstants.YES.equals(nameIssue)) {
+                        if (Objects.equals(CoreConstants.YES, userEnteredText)) {
                             storeUser.get(userChatId).updateStep(Steps.STEP122);
+                            executeMessage(sendMessageBotService.writeDescriptionIssue(userChatId));
                         } else {
                             executeMessage(sendMessageBotService.writeNameIssue(userChatId));
                         }
                     } else {
                         //вы ввели... верно? да/нет
-                        storeOrders.get(userChatId).setNameIssue(nameIssue);
-                        executeMessage(sendMessageBotService.messageChooseYesOrNo(userChatId, nameIssue));
+                        storeOrders.get(userChatId).setNameIssue(userEnteredText);
+                        executeMessage(sendMessageBotService.messageChooseYesOrNo(userChatId, userEnteredText));
                     }
 
                     break;
 
                 // Создание заявки. Описание
                 case STEP122:
+                    storeOrders.get(userChatId).setDescription(userEnteredText);
+                    executeMessage(sendMessageBotService.messageUserContacts(userChatId));
+                    storeUser.get(userChatId).updateStep(Steps.STEP123);
+
+                    break;
+
+                // Создание заявки. Контактные данные
+                case STEP123:
+                    storeOrders.get(userChatId).setContact(userEnteredText);
+                    if (Objects.equals(storeOrders.get(userChatId).getIssueType(), JiraConstants.ISSUE_TYPE_REGULAR)) {
+                        storeUser.get(userChatId).updateStep(Steps.STEP124);
+                        executeMessage(sendMessageBotService.messageEnterAnyDeskID(userChatId));
+                    } else {
+                        storeUser.get(userChatId).updateStep(Steps.STEP125);
+                        //executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                    }
+
+                    break;
+
+                // Создание заявки. AnyDesk
+                case STEP124:
+
+                    break;
+
+                // Создание заявки. Прикрепление доп.файлов
+                case STEP125:
+
+                    break;
+
+                // Отмена действия. Предупреждение
+                case STEP997:
+                    // TODO
+                    // Для реализации предупреждения об отмене, необходимо хранить предыдущий шаг.
+                    // Это можно реализовать дополнительным аргументом в модели User,
+                    // либо изменить тип хранения Steps в модели User на Dequeue (LIFO)
 
                 // Отмена действия
                 case STEP998:
