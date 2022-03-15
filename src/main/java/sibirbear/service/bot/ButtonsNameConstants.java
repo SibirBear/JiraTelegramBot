@@ -12,6 +12,7 @@ public class ButtonsNameConstants {
     public static final String YES = "ДА";
     public static final String NO = "НЕТ";
     public static final String CANCEL = "ОТМЕНА";
+    public static final String DONE = "ЗАВЕРШИТЬ";
 
     public static final String RETURNTOMENU = "Возврат в\nглавное меню";
 

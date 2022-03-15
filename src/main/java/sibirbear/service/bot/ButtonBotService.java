@@ -45,6 +45,12 @@ public class ButtonBotService {
                         createRowButtons(Collections.singletonList(ButtonsNameConstants.CANCEL))));
     }
 
+    public ReplyKeyboardMarkup addAttachmentAndCancelButton() {
+        return setKeyboardMessage(
+                createRowButtonList(
+                        createRowButtons(Arrays.asList(ButtonsNameConstants.DONE, ButtonsNameConstants.CANCEL))));
+    }
+
     public ReplyKeyboardMarkup returnToPrimaryMenuButtonMessage() {
         return setKeyboardMessage(
                 createRowButtonList(

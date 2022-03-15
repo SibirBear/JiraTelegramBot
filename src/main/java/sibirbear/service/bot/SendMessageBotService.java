@@ -74,6 +74,18 @@ public class SendMessageBotService {
                 buttonBotService.cancelButton());
     }
 
+    public SendMessage messageAddAttachments(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ADD_ATTACHMENT.getText(),
+                buttonBotService.addAttachmentAndCancelButton());
+    }
+
+    public SendMessage messageWrongAnyDeskID(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.WRONG_ANYDESK_ID.getText(),
+                buttonBotService.cancelButton());
+    }
+
     public SendMessage returnToPrimaryMenu(long chatId) {
         return createSimpleMessageDeleteKeyboard(chatId,
                 SendMessageConstantText.RETURN_TO_PRIMARY_MENU_ACTION.getText());

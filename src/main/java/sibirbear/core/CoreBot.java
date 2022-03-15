@@ -35,6 +35,7 @@ public class CoreBot extends TelegramLongPollingBot {
     private final SendMessageBotService sendMessageBotService = new SendMessageBotService();
     private final StoreUsers storeUser = new StoreUsers();
     private final StoreOrders storeOrders = new StoreOrders();
+    private final int ID_ANYDESK_LENGTH = 9;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -69,6 +70,9 @@ public class CoreBot extends TelegramLongPollingBot {
             // Проверка на нажатие кнопки ОТМЕНА в процессе создания заявки
             if (CoreConstants.CANCEL.equals(userEnteredText)) {
                 storeUser.get(userChatId).updateStep(Steps.STEP997);
+            } else if (CoreConstants.DONE.equals(userEnteredText)
+                    && storeUser.get(userChatId).getStep().equals(Steps.STEP125)){
+                storeUser.get(userChatId).updateStep(Steps.STEP126);
             }
 
             Steps currentStep = storeUser.get(userChatId).getStep();
@@ -167,18 +171,29 @@ public class CoreBot extends TelegramLongPollingBot {
                         executeMessage(sendMessageBotService.messageEnterAnyDeskID(userChatId));
                     } else {
                         storeUser.get(userChatId).updateStep(Steps.STEP125);
-                        //executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                        executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
                     }
 
                     break;
 
                 // Создание заявки. AnyDesk
                 case STEP124:
+                    if (userEnteredText.length() != ID_ANYDESK_LENGTH) {
+                        executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
+                    } else {
+                        storeUser.get(userChatId).updateStep(Steps.STEP125);
+                        executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                    }
 
                     break;
 
                 // Создание заявки. Прикрепление доп.файлов
                 case STEP125:
+
+                    break;
+
+                //Создание заявки. Проверка введенных данных
+                case STEP126:
 
                     break;
 

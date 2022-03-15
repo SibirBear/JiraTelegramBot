@@ -8,5 +8,6 @@ public class CoreConstants {
     public static final String YES = ButtonsNameConstants.YES;
     public static final String NO = ButtonsNameConstants.NO;
     public static final String CANCEL = ButtonsNameConstants.CANCEL;
+    public static final String DONE = ButtonsNameConstants.DONE;
 
 }
