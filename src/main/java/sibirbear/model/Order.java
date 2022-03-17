@@ -110,7 +110,7 @@ public class Order {
                 ", description='" + description + '\'' +
                 ", contact='" + contact + '\'' +
                 ", department='" + department + '\'' +
-                ", attachment=" + attachment +
+                ", attachment=" + getAttachment().toString() +
                 ", isCreated=" + isCreated +
                 '}';
     }

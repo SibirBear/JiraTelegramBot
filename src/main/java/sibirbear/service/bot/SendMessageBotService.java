@@ -1,6 +1,7 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import sibirbear.store.StoreOrders;
 
 import static sibirbear.service.bot.SendMessageBuilder.*;
 
@@ -45,6 +46,16 @@ public class SendMessageBotService {
                 buttonBotService.returnToPrimaryMenuButtonMessage());
     }
 
+    public SendMessage writeDivisionIssue(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.ENTER_DIVISION.getText());
+    }
+
+    public SendMessage errorDivisionIssue(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.ERROR_DIVISION.getText());
+    }
+
     public SendMessage writeNameIssue(long chatId) {
         return createSimpleMessageDeleteKeyboard(chatId,
                 SendMessageConstantText.ENTER_ISSUE_NAME.getText());
@@ -83,6 +94,12 @@ public class SendMessageBotService {
     public SendMessage messageWrongAnyDeskID(long chatId) {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.WRONG_ANYDESK_ID.getText(),
+                buttonBotService.cancelButton());
+    }
+
+    public SendMessage messageEND(long chatId, StoreOrders storeOrders) {
+        return createMessageWithKeyboard(chatId,
+                storeOrders.get(chatId).toString(),
                 buttonBotService.cancelButton());
     }
 

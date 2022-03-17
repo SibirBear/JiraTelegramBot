@@ -14,7 +14,6 @@ import sibirbear.model.User;
 import sibirbear.service.RequestUserFromJira;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
-import sibirbear.service.bot.SendMessageBuilder;
 import sibirbear.store.StoreOrders;
 import sibirbear.store.StoreUsers;
 
@@ -35,11 +34,12 @@ public class CoreBot extends TelegramLongPollingBot {
     private final SendMessageBotService sendMessageBotService = new SendMessageBotService();
     private final StoreUsers storeUser = new StoreUsers();
     private final StoreOrders storeOrders = new StoreOrders();
-    private final int ID_ANYDESK_LENGTH = 9;
+    private final static int ID_ANYDESK_LENGTH = 9;
+    private final static int DIVISION_NUMBER_LENGTH = 4;
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage()) { // && update.getMessage().hasText()
             if (START.equals(update.getMessage().getText())) {
                 executeMessage(sendMessageBotService.startMessage(update.getMessage().getChatId()));
             }
@@ -71,8 +71,8 @@ public class CoreBot extends TelegramLongPollingBot {
             if (CoreConstants.CANCEL.equals(userEnteredText)) {
                 storeUser.get(userChatId).updateStep(Steps.STEP997);
             } else if (CoreConstants.DONE.equals(userEnteredText)
-                    && storeUser.get(userChatId).getStep().equals(Steps.STEP125)){
-                storeUser.get(userChatId).updateStep(Steps.STEP126);
+                    && storeUser.get(userChatId).getStep().equals(Steps.STEP126)){
+                storeUser.get(userChatId).updateStep(Steps.STEP127);
             }
 
             Steps currentStep = storeUser.get(userChatId).getStep();
@@ -133,73 +133,96 @@ public class CoreBot extends TelegramLongPollingBot {
                     storeOrders.get(userChatId).setIssueType(issueType);
 
                     storeUser.get(userChatId).updateStep(Steps.STEP121);
-                    executeMessage(sendMessageBotService.writeNameIssue(userChatId));
+                    executeMessage(sendMessageBotService.writeDivisionIssue(userChatId));
 
                     break;
 
-                // Создание заявки. Название заявки
+
+                //Создание заявки. Выбор подразделения
                 case STEP121:
-                    if (storeOrders.get(userChatId).getNameIssue() != null
-                            || !Objects.equals(storeOrders.get(userChatId).getNameIssue(), "")) {
-                        if (Objects.equals(CoreConstants.YES, userEnteredText)) {
-                            storeUser.get(userChatId).updateStep(Steps.STEP122);
-                            executeMessage(sendMessageBotService.writeDescriptionIssue(userChatId));
-                        } else {
-                            executeMessage(sendMessageBotService.writeNameIssue(userChatId));
-                        }
+                    if (userEnteredText.length() == DIVISION_NUMBER_LENGTH) {
+
+                        //TODO:
+                        // Написать проверку номера магазина через запрос к БД
+
+                        storeUser.get(userChatId).updateStep(Steps.STEP122);
+                        executeMessage(sendMessageBotService.writeNameIssue(userChatId));
                     } else {
-                        //вы ввели... верно? да/нет
-                        storeOrders.get(userChatId).setNameIssue(userEnteredText);
-                        executeMessage(sendMessageBotService.messageChooseYesOrNo(userChatId, userEnteredText));
+                        executeMessage(sendMessageBotService.errorDivisionIssue(userChatId));
                     }
 
                     break;
 
-                // Создание заявки. Описание
+                // Создание заявки. Название заявки
                 case STEP122:
-                    storeOrders.get(userChatId).setDescription(userEnteredText);
-                    executeMessage(sendMessageBotService.messageUserContacts(userChatId));
+                    storeOrders.get(userChatId).setNameIssue(userEnteredText);
                     storeUser.get(userChatId).updateStep(Steps.STEP123);
+                    executeMessage(sendMessageBotService.writeDescriptionIssue(userChatId));
+
+                    break;
+
+                // Создание заявки. Описание
+                case STEP123:
+                    storeOrders.get(userChatId).setDescription(userEnteredText);
+                    storeUser.get(userChatId).updateStep(Steps.STEP124);
+                    executeMessage(sendMessageBotService.messageUserContacts(userChatId));
 
                     break;
 
                 // Создание заявки. Контактные данные
-                case STEP123:
+                case STEP124:
                     storeOrders.get(userChatId).setContact(userEnteredText);
                     if (Objects.equals(storeOrders.get(userChatId).getIssueType(), JiraConstants.ISSUE_TYPE_REGULAR)) {
-                        storeUser.get(userChatId).updateStep(Steps.STEP124);
+                        storeUser.get(userChatId).updateStep(Steps.STEP125);
                         executeMessage(sendMessageBotService.messageEnterAnyDeskID(userChatId));
                     } else {
-                        storeUser.get(userChatId).updateStep(Steps.STEP125);
+                        storeUser.get(userChatId).updateStep(Steps.STEP126);
                         executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
                     }
 
                     break;
 
                 // Создание заявки. AnyDesk
-                case STEP124:
+                case STEP125:
                     if (userEnteredText.length() != ID_ANYDESK_LENGTH) {
                         executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
                     } else {
-                        storeUser.get(userChatId).updateStep(Steps.STEP125);
+                        storeUser.get(userChatId).updateStep(Steps.STEP126);
                         executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
                     }
 
                     break;
 
                 // Создание заявки. Прикрепление доп.файлов
-                case STEP125:
+                case STEP126:
+                    System.out.println(1);
+                    String id = "";
+                    if (update.getMessage().getPhoto() != null) {
+                        System.out.println(2);
+                        id = update.getMessage().getPhoto().get(3).getFileId();
+                        storeOrders.get(userChatId).addAttachmentFile(id);
+                    } else if (update.getMessage().getDocument() != null) {
+                        System.out.println(3);
+                        id = update.getMessage().getDocument().getFileId();
+                        storeOrders.get(userChatId).addAttachmentFile(id);
+                    }
+                    System.out.println(4);
 
                     break;
 
                 //Создание заявки. Проверка введенных данных
-                case STEP126:
+                case STEP127:
+                    //TODO: Добавить блок отправки данных в Jira для создания заявки.
+                    //TODO: Очистить Orders, у User только Steps.
+                    // DELETE AFTER TEST
+                    executeMessage(sendMessageBotService.messageEND(userChatId, storeOrders));
+                    // DELETE AFTER TEST
 
                     break;
 
                 // Отмена действия. Предупреждение
                 case STEP997:
-                    // TODO
+                    //TODO:
                     // Для реализации предупреждения об отмене, необходимо хранить предыдущий шаг.
                     // Это можно реализовать дополнительным аргументом в модели User,
                     // либо изменить тип хранения Steps в модели User на Dequeue (LIFO)
