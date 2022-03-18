@@ -15,6 +15,7 @@ public class Config {
     private static final String CONFIG_PATH = "projects-configs/";
 
     private static ConfigTelegramSettings configTelegramSettings;
+    private static ConfigOracleDB configOracleDB;
     private static Config config;
     private static String authJira;
     private static String urlJira;
@@ -32,7 +33,12 @@ public class Config {
         authJira = properties.getProperty("AUTH_JIRA");
         urlJira = properties.getProperty("URL_JIRA");
         pathToExchange = properties.getProperty("PATH_TO_EXCHANGE");
+        String dbOracleUrl = properties.getProperty("DB_ORACLE_URL");
+        String dbOracleUser = properties.getProperty("DB_ORACLE_USER");
+        String dbOraclePass = properties.getProperty("DB_ORACLE_PASS");
+
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
+        configOracleDB = new ConfigOracleDB(dbOracleUrl, dbOracleUser,dbOraclePass);
 
         return config;
     }
@@ -57,5 +63,9 @@ public class Config {
 
     public static String getPathToExchange() {
         return pathToExchange;
+    }
+
+    public static ConfigOracleDB getConfigOracleDB() {
+        return configOracleDB;
     }
 }
