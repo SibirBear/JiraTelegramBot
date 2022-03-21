@@ -10,7 +10,7 @@ public class RequestUserFromJira {
     public static int findUserJira(final String user) {
         int responseUser = 404;
         HttpURLConnection http;
-        String url = Config.getUrlUser() + user;
+        String url = "https://jira.fermer-centr.shop/rest/api/2/user?key=" + user;
         ConnectHTTP connectHTTP = new ConnectHTTP(url, TypeRequestHTTP.GET);
         try {
             http = connectHTTP.connect();
