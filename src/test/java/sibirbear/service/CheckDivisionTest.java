@@ -18,7 +18,6 @@ class CheckDivisionTest {
         Config.init();
     }
 
-
     @Test
     void isDivisionRealTest() {
         CheckDivision checkDivision = new CheckDivision();

@@ -11,6 +11,7 @@ import sibirbear.jiraAPI.JiraConstants;
 import sibirbear.model.Order;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
+import sibirbear.service.CheckDivision;
 import sibirbear.service.RequestUserFromJira;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
@@ -140,11 +141,11 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 //Создание заявки. Выбор подразделения
                 case STEP121:
-                    if (userEnteredText.length() == DIVISION_NUMBER_LENGTH) {
+                    CheckDivision checkDivision = new CheckDivision();
+                    executeMessage((sendMessageBotService.awaitingMessage(userChatId)));
 
-                        //TODO:
-                        // Написать проверку номера магазина через запрос к БД
-
+                    if (userEnteredText.length() == DIVISION_NUMBER_LENGTH
+                            && checkDivision.isDivisionReal(userEnteredText)) {
                         storeUser.get(userChatId).updateStep(Steps.STEP122);
                         executeMessage(sendMessageBotService.writeNameIssue(userChatId));
                     } else {
