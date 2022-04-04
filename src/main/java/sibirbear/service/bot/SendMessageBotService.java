@@ -1,7 +1,10 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import sibirbear.jiraAPI.exceptions.JiraIssueURL;
 import sibirbear.store.StoreOrders;
+
+import java.util.List;
 
 import static sibirbear.service.bot.SendMessageBuilder.*;
 
@@ -10,7 +13,7 @@ public class SendMessageBotService {
     private final ButtonBotService buttonBotService = new ButtonBotService();
 
     public SendMessage startMessage(long chatId) {
-        return createSimpleMessage(chatId, SendMessageConstantText.GREETINGS.getText());
+        return createSimpleMessageDeleteKeyboard(chatId, SendMessageConstantText.GREETINGS.getText());
     }
 
     public SendMessage authorizationLoginMessage(long chatId) {
@@ -40,7 +43,30 @@ public class SendMessageBotService {
         return message;
     }
 
-    public SendMessage listOfIssues(long chatId) {
+    public SendMessage listOfIssues(long chatId, List<JiraIssueURL> listIssues) {
+
+        //TODO Убрать отсюда в отдельный класс
+        StringBuilder sb = new StringBuilder();
+        sb.append("*Список заявок:*\n\n");
+
+        if (listIssues.size() == 0) {
+            sb.append("_Открытых заявок, созданных тобой - нет._\n");
+        } else {
+            for (JiraIssueURL jiraIssueURL : listIssues) {
+                String url = "*" + jiraIssueURL.getUrl() + "*\n";
+                String description = "_" + jiraIssueURL.getDescription() + "_\n\n";
+                sb.append(url);
+                sb.append(description);
+            }
+        }
+
+        SendMessage message = createSimpleMessageDeleteKeyboard(chatId, sb.toString());
+        message.enableMarkdown(true);
+
+        return message;
+    }
+
+    public SendMessage listOfIssuesEnd(long chatId) {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.RETURN_TO_PRIMARY_MENU_BUTTON.getText(),
                 buttonBotService.returnToPrimaryMenuButtonMessage());

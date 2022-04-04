@@ -24,7 +24,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
 
 public class JiraAPI {
 
@@ -120,38 +122,46 @@ public class JiraAPI {
     }
 
     //получить список открытых заявок
-    public List<JiraIssueURL> listIssues(final String reporter) throws URISyntaxException, IOException {
+    public List<JiraIssueURL> listIssues(final String reporter) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme(BASE_URI_SCHEME).setHost(BASE_URI_HOST).setPath(JIRA_API_SEARCH)
                 .setParameter("jql", "reporter=" + reporter + " AND status NOT IN (5,6)");
-        URI uri = uriBuilder.build();
+        URI uri = null;
+        try {
+            uri = uriBuilder.build();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         HttpGet httpGet = new HttpGet(uri);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
         httpGet.setHeader(HttpHeaders.CONTENT_TYPE, HTTP_HEADER_CONTENT_TYPE_JSON);
 
-        CloseableHttpResponse response = httpClient.execute(httpGet);
-
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
         StringBuilder stringBuilder = new StringBuilder();
-        boolean isEnd = false;
 
-        while (!isEnd) {
-            String line = br.readLine();
-            if (line == null) {
-                isEnd = true;
-            } else {
-                stringBuilder. append(line);
+        try(CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
+
+            boolean isEnd = false;
+            while (!isEnd) {
+                String line = br.readLine();
+                if (line == null) {
+                    isEnd = true;
+                } else {
+                    stringBuilder. append(line);
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         JSONObject jsonMain = new JSONObject(stringBuilder.toString());
         JSONArray jsonArrayIssues = jsonMain.getJSONArray(JIRA_JSON_KEY_ISSUES);
 
-        List<JiraIssueURL> listIssues = new ArrayList<>();
+        List<JiraIssueURL> listIssues = Collections.synchronizedList(new ArrayList<>());
 
         for (int i = 0; i < jsonArrayIssues.length(); i++) {
             String key = jsonArrayIssues.getJSONObject(i).get("key").toString();
