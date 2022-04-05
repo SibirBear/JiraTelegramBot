@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 public class JiraAPI {
 
@@ -41,6 +40,7 @@ public class JiraAPI {
     private final String JIRA_API_SEARCH = "/rest/api/2/search";
     private final String JIRA_API_LATEST_ISSUE = "/rest/api/latest/issue/";
     private final String JIRA_API_ATTACHMENTS = "/attachments";
+    private final String JIRA_API_USER = "/rest/api/2/user";
 
     private final String JIRA_JSON_KEY_ISSUES = "issues";
     private final String JIRA_JSON_KEY_FIELDS = "fields";
@@ -176,14 +176,27 @@ public class JiraAPI {
     }
 
     //проверить пользователя
+    public int findUserJira(final String user) {
+        int responseUser = 404;
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(BASE_URL + JIRA_API_USER + "?key=" + user);
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
+
+        CloseableHttpResponse response;
+
+        try {
+            response = httpClient.execute(httpGet);
+            responseUser = response.getStatusLine().getStatusCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return responseUser;
+
+    }
 
 
     //базовый метод отправки http запроса
-
-
-
-
-
 
 
 }

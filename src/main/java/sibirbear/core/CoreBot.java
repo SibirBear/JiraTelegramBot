@@ -7,7 +7,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import sibirbear.config.Config;
+import sibirbear.jiraAPI.JiraAPI;
 import sibirbear.jiraAPI.JiraConstants;
+import sibirbear.jiraAPI.exceptions.JiraIssueURL;
 import sibirbear.model.Order;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
@@ -18,6 +20,7 @@ import sibirbear.service.bot.SendMessageBotService;
 import sibirbear.store.StoreOrders;
 import sibirbear.store.StoreUsers;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -35,6 +38,7 @@ public class CoreBot extends TelegramLongPollingBot {
     private final SendMessageBotService sendMessageBotService = new SendMessageBotService();
     private final StoreUsers storeUser = new StoreUsers();
     private final StoreOrders storeOrders = new StoreOrders();
+    private final JiraAPI jiraApi = new JiraAPI(Config.getUrlJira(),Config.getAuthJira());
     private final static int ID_ANYDESK_LENGTH = 9;
     private final static int DIVISION_NUMBER_LENGTH = 4;
 
@@ -88,7 +92,7 @@ public class CoreBot extends TelegramLongPollingBot {
                     executeMessage(sendMessageBotService.awaitingMessage(userChatId));
 
                     //перенести в Jira API
-                    int result = RequestUserFromJira.findUserJira(loginUser.toLowerCase(Locale.ROOT));
+                    int result = jiraApi.findUserJira(loginUser.toLowerCase(Locale.ROOT));
                     //------------------------------
 
                     if (result == HTTP_OK) {
@@ -108,12 +112,27 @@ public class CoreBot extends TelegramLongPollingBot {
                         executeMessage(sendMessageBotService.chooseTypeIssueMessage(userChatId));
                     }
 
+
+                    //TODO Тут затык надо подумать как переход сделать
                     if (ButtonsNameConstants.LIST_ISSUES.equals(update.getMessage().getText())) {
-                        storeUser.get(userChatId).updateStep(Steps.STEP999);
-                        executeMessage(sendMessageBotService.listOfIssues(userChatId));
+                        storeUser.get(userChatId).updateStep(Steps.STEP110);
+
                     }
 
                     break;
+
+                //Список заявок
+                case STEP110:
+
+                    executeMessage(sendMessageBotService.awaitingMessage(userChatId));
+                    List<JiraIssueURL> j = jiraApi.listIssues(storeUser.get(userChatId).getUserName());
+
+                    executeMessage(sendMessageBotService.listOfIssues(userChatId, j));
+
+                    executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
+                    storeUser.get(userChatId).updateStep(Steps.STEP999);
+                    break;
+
 
                 // Создание заявки. Выбор проекта
                 case STEP120:
@@ -185,7 +204,7 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. AnyDesk
                 case STEP125:
-                    if (userEnteredText.length() != ID_ANYDESK_LENGTH) {
+                    if (userEnteredText.trim().length() != ID_ANYDESK_LENGTH) {
                         executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
                     } else {
                         storeUser.get(userChatId).updateStep(Steps.STEP126);
@@ -197,7 +216,7 @@ public class CoreBot extends TelegramLongPollingBot {
                 // Создание заявки. Прикрепление доп.файлов
                 case STEP126:
                     System.out.println(1);
-                    String id = "";
+                    String id;
                     if (update.getMessage().getPhoto() != null) {
                         System.out.println(2);
                         id = update.getMessage().getPhoto().get(3).getFileId();
