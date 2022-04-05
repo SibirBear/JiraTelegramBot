@@ -14,7 +14,6 @@ import sibirbear.model.Order;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
 import sibirbear.service.CheckDivision;
-import sibirbear.service.RequestUserFromJira;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
 import sibirbear.store.StoreOrders;
