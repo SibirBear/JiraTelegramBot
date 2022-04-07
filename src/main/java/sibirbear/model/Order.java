@@ -9,9 +9,10 @@ package sibirbear.model;
  *  nameOrder - название issue;
  *  description - описание issue;
  *  contact - контактная информация для связи по issue;
+ *  idanydesk - id для подключения Anydesk;
  *  department - подразделение, на которое распространяется issue;
  *  attachment - названия файлов в "обменнике" для прикрепления к issue;
- *  isCreated - признак, что issue по указанным параметрам создан в Jira; *
+ *  isCreated - признак, что issue по указанным параметрам создан в Jira;
  */
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class Order {
     private String nameIssue;
     private String description;
     private String contact;
+    private String idanydesk;
     private String department;
     private final List<String> attachment;
     private boolean isCreated;
@@ -74,6 +76,14 @@ public class Order {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    public String getIdanydesk() {
+        return idanydesk;
+    }
+
+    public void setIdanydesk(String idanydesk) {
+        this.idanydesk = idanydesk;
     }
 
     public String getDepartment() {

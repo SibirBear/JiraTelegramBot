@@ -1,7 +1,7 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import sibirbear.jiraAPI.exceptions.JiraIssueURL;
+import sibirbear.jiraAPI.JiraIssueURL;
 import sibirbear.store.StoreOrders;
 
 import java.util.List;

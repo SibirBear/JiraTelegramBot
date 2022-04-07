@@ -1,6 +1,4 @@
-package sibirbear.jiraAPI.exceptions;
-
-import sibirbear.jiraAPI.JiraConstants;
+package sibirbear.jiraAPI;
 
 public class JiraIssueURL {
 
@@ -8,7 +6,8 @@ public class JiraIssueURL {
     private final String description;
 
     /**
-     * Класс для хранения ссылки на заявку в Jira и 30 знаков из ее описания для вывода списка открытых заявок
+     * Класс для хранения ссылки на заявку в Jira и определенное в константе JIRA_ISSUE_URL_DESCRIPTION_LENGTH
+     * количество знаков из описания заявки для вывода списка открытых заявок.
      * @param key ключ заявки вида ПРОЕКТ-НОМЕР ЗАЯВКИ (TEST-1234)
      * @param description описание заявки
      */

@@ -17,7 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sibirbear.jiraAPI.exceptions.JiraIssueURL;
+import sibirbear.jiraAPI.exceptions.JiraApiException;
 
 import java.io.*;
 import java.net.URI;
@@ -79,6 +79,8 @@ public class JiraAPI {
 
         InputStream inputStream = httpResponse.getEntity().getContent();
 
+                System.out.println("\n"+httpResponse.getStatusLine());
+
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -88,14 +90,20 @@ public class JiraAPI {
             stringBuilder.append((char) charIndex);
         }
 
-        JSONObject json = new JSONObject(stringBuilder);
+                System.out.println("\n" + stringBuilder.toString() + "\n");
+
+        JSONObject json = new JSONObject(stringBuilder.toString());
+
+                System.out.println(json.getString("key"));
 
         return json.getString("key");
 
     }
 
-    //добавить файлы к заявке
-    public void addAttachment(final String issueKey, final String file) throws IOException {
+    //добавить файл к заявке
+    public boolean addAttachment(final String issueKey, final String file) throws JiraApiException {
+        boolean result = false;
+
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(BASE_URL + JIRA_API_LATEST_ISSUE + issueKey + JIRA_API_ATTACHMENTS);
 
@@ -117,8 +125,33 @@ public class JiraAPI {
 
         httpPost.setEntity(requestEntity);
 
-        httpClient.execute(httpPost);
+        try {
+            httpClient.execute(httpPost);
+            result = true;
 
+        } catch (IOException e) {
+            throw new JiraApiException("File " + file + " cannot add to " + issueKey + "\n" + e);
+            //e.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+    //добавить файл к заявке
+    public boolean addMultiAttachment(final String issueKey, final List<String> files) {
+        int count = 0;
+        for (String file : files) {
+            try {
+                if (addAttachment(issueKey, file)) {
+                    count++;
+                }
+            } catch (JiraApiException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return count >= files.size();
     }
 
     //получить список открытых заявок

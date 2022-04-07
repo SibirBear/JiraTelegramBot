@@ -9,11 +9,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import sibirbear.config.Config;
 import sibirbear.jiraAPI.JiraAPI;
 import sibirbear.jiraAPI.JiraConstants;
-import sibirbear.jiraAPI.exceptions.JiraIssueURL;
+import sibirbear.jiraAPI.JiraIssueURL;
 import sibirbear.model.Order;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
 import sibirbear.service.CheckDivision;
+import sibirbear.service.CreateOrderJira;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
 import sibirbear.store.StoreOrders;
@@ -118,18 +119,20 @@ public class CoreBot extends TelegramLongPollingBot {
 
                     }
 
-                    break;
+                    //break;
 
                 //Список заявок
                 case STEP110:
+                    if (storeUser.get(userChatId).getStep().equals(Steps.STEP110)) {
+                        executeMessage(sendMessageBotService.awaitingMessage(userChatId));
+                        List<JiraIssueURL> j = jiraApi.listIssues(storeUser.get(userChatId).getUserName());
 
-                    executeMessage(sendMessageBotService.awaitingMessage(userChatId));
-                    List<JiraIssueURL> j = jiraApi.listIssues(storeUser.get(userChatId).getUserName());
+                        executeMessage(sendMessageBotService.listOfIssues(userChatId, j));
 
-                    executeMessage(sendMessageBotService.listOfIssues(userChatId, j));
+                        executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
+                        storeUser.get(userChatId).updateStep(Steps.STEP999);
+                    }
 
-                    executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
-                    storeUser.get(userChatId).updateStep(Steps.STEP999);
                     break;
 
 
@@ -165,6 +168,7 @@ public class CoreBot extends TelegramLongPollingBot {
                     if (userEnteredText.length() == DIVISION_NUMBER_LENGTH
                             && checkDivision.isDivisionReal(userEnteredText)) {
                         storeUser.get(userChatId).updateStep(Steps.STEP122);
+                        storeOrders.get(userChatId).setDepartment(userEnteredText);
                         executeMessage(sendMessageBotService.writeNameIssue(userChatId));
                     } else {
                         executeMessage(sendMessageBotService.errorDivisionIssue(userChatId));
@@ -207,6 +211,7 @@ public class CoreBot extends TelegramLongPollingBot {
                         executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
                     } else {
                         storeUser.get(userChatId).updateStep(Steps.STEP126);
+                        storeOrders.get(userChatId).setIdanydesk(userEnteredText);
                         executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
                     }
 
@@ -214,6 +219,7 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Прикрепление доп.файлов
                 case STEP126:
+                    // TODO: Добавить сохранение в temp директорию до загрузки, предусмотреть очистку зависших
                     System.out.println(1);
                     String id;
                     if (update.getMessage().getPhoto() != null) {
@@ -231,13 +237,20 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 //Создание заявки. Проверка введенных данных
                 case STEP127:
-                    //TODO: Добавить блок отправки данных в Jira для создания заявки.
-                    //TODO: Очистить Orders, у User только Steps.
+
                     // DELETE AFTER TEST
+                            System.out.println("Creating issue...");
+                            System.out.println(storeOrders.get(userChatId).isCreated());
+
+                    CreateOrderJira.createJiraIssue(jiraApi, storeOrders.get(userChatId));
+
+                            System.out.println(storeOrders.get(userChatId).isCreated() + "\n");
+
                     executeMessage(sendMessageBotService.messageEND(userChatId, storeOrders));
+
                     // DELETE AFTER TEST
 
-                    break;
+                    //break;
 
                 // Отмена действия. Предупреждение
                 case STEP997:

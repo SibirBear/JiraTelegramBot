@@ -1,6 +1,8 @@
 package sibirbear.jiraAPI.exceptions;
 
-public class JiraApiException extends Exception{
+import java.io.IOException;
+
+public class JiraApiException extends RuntimeException {
 
     public JiraApiException() {
         super();
