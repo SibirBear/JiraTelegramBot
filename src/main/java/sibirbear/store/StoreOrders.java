@@ -1,21 +1,24 @@
 package sibirbear.store;
 
-import sibirbear.model.Order;
+import sibirbear.jiraAPI.issue.Issue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StoreOrders implements IStore<Order>{
+public class StoreOrders implements IStore<Issue>{
 
-    private final Map<Long, Order> storeOrders = new HashMap<>();
+    private final Map<Long, Issue> storeOrders = new HashMap<>();
 
     @Override
-    public void save(long chatID, Order order) {
-        storeOrders.put(chatID, order);
+    public void save(long chatID, Issue issue) {
+        storeOrders.put(chatID, issue);
     }
 
     @Override
-    public Order get(long chatId) {
+    public Issue get(long chatId) {
+        if (!contains(chatId)) {
+            return null;
+        }
         return storeOrders.get(chatId);
     }
 
