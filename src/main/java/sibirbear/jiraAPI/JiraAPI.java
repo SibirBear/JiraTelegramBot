@@ -4,7 +4,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -15,11 +14,16 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sibirbear.jiraAPI.exceptions.JiraApiException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -27,11 +31,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static sibirbear.jiraAPI.JiraConstants.JIRA_NAME_ATTACH_FILE;
+
 public class JiraAPI {
 
-    private final String HTTP_PROPERTY_CONTENT = "Content-Type";
+    private static final Logger log = LogManager.getLogger(JiraAPI.class);
+
     private final String HTTP_HEADER_CONTENT_TYPE_JSON = "application/json";
-    private final String HTTP_PROPERTY_AUTH = "Authorization";
     private final String HTTP_PROPERTY_ATLAS_TOKEN = "X-Atlassian-Token";
     private final String HTTP_PROPERTY_NO_CHECK = "no-check";
 
@@ -51,12 +57,19 @@ public class JiraAPI {
     private final String BASE_URI_HOST;
     private final String CREDENTIALS;
 
+    private int countFiles = 1;
+
     /**
      * Принимает путь до Api Jira Atlassian
      * @param url строка, содержит URL до Api Jira
      * @param credentials строка, содержит логин и пароль для авторизации в Jira в кодировке base64
      */
-    public JiraAPI(final String url, final String credentials) {
+    public JiraAPI(final String url, final String credentials) throws JiraApiException {
+        if (url == null || credentials == null
+                || url.equals("") || credentials.equals("")) {
+            throw new JiraApiException("URL to Jira or Credentials cannot be empty.");
+        }
+
         this.BASE_URL = url;
         this.CREDENTIALS = credentials;
 
@@ -67,34 +80,35 @@ public class JiraAPI {
     }
 
     //создание заявки
-    public String httpCreateIssue(final String query) throws IOException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+    public String httpCreateIssue(final String query) throws JiraApiException {
+
         HttpPost httpPost = new HttpPost(BASE_URL + JIRA_API_ISSUE);
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
 
         StringEntity requestEntity = new StringEntity(query, ContentType.APPLICATION_JSON);
         httpPost.setEntity(requestEntity);
 
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-
-        InputStream inputStream = httpResponse.getEntity().getContent();
-
-                System.out.println("\n"+httpResponse.getStatusLine());
-
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
         StringBuilder stringBuilder = new StringBuilder();
-        int charIndex;
 
-        while ((charIndex = bufferedReader.read()) != -1) {
-            stringBuilder.append((char) charIndex);
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+             BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(
+                             httpResponse.getEntity().getContent(),
+                             StandardCharsets.UTF_8)
+             )
+             ) {
+
+            int charIndex;
+            while ((charIndex = bufferedReader.read()) != -1) {
+                stringBuilder.append((char) charIndex);
+            }
+
+        } catch (IOException e) {
+            throw new JiraApiException("Error with create HttpClient for creating issue. " + e);
         }
 
-                System.out.println("\n" + stringBuilder.toString() + "\n");
-
         JSONObject json = new JSONObject(stringBuilder.toString());
-
-                System.out.println(json.getString("key"));
 
         return json.getString("key");
 
@@ -102,36 +116,36 @@ public class JiraAPI {
 
     //добавить файл к заявке
     public boolean addAttachment(final String issueKey, final String file) throws JiraApiException {
-        boolean result = false;
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        boolean result = false;
+        File fileToAttach = new File(file);
+
         HttpPost httpPost = new HttpPost(BASE_URL + JIRA_API_LATEST_ISSUE + issueKey + JIRA_API_ATTACHMENTS);
 
         Header header = new BasicHeader(HTTP_PROPERTY_ATLAS_TOKEN, HTTP_PROPERTY_NO_CHECK);
         httpPost.setHeader(header);
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
 
-        //String fileExtension = file.split("\\.")[1];
-
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-
-        //TODO сделать константой название файла и добавить цифру в название, чтобы изменялось по кол-ву загруженных файлов
         HttpEntity requestEntity = multipartEntityBuilder.addBinaryBody(
                 "file",
-                new File(file),
+                fileToAttach,
                 ContentType.APPLICATION_OCTET_STREAM,
-                "Attach_from_bot." + FilenameUtils.getExtension(file))
+                        JIRA_NAME_ATTACH_FILE + countFiles++ + "." + FilenameUtils.getExtension(file))
                 .build();
 
         httpPost.setEntity(requestEntity);
 
-        try {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             httpClient.execute(httpPost);
+            log.info("[" + getClass() + "] " + " File: " + fileToAttach + " uploaded successful!");
             result = true;
+            boolean deleteResult = fileToAttach.delete();
+            log.info("[" + getClass() + "] " + " File: " + fileToAttach + " deleted successful! " + deleteResult);
 
         } catch (IOException e) {
+            log.error("[" + getClass() + "] " + " ERROR! " + e.getMessage());
             throw new JiraApiException("File " + file + " cannot add to " + issueKey + "\n" + e);
-            //e.printStackTrace();
         }
 
         return result;
@@ -155,8 +169,7 @@ public class JiraAPI {
     }
 
     //получить список открытых заявок
-    public List<JiraIssueURL> listIssues(final String reporter) {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+    public List<JiraIssueURL> listIssues(final String reporter) throws JiraApiException {
 
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme(BASE_URI_SCHEME).setHost(BASE_URI_HOST).setPath(JIRA_API_SEARCH)
@@ -165,7 +178,7 @@ public class JiraAPI {
         try {
             uri = uriBuilder.build();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            throw new JiraApiException("Syntax error with url building parameters. " + e);
         }
 
         HttpGet httpGet = new HttpGet(uri);
@@ -174,7 +187,8 @@ public class JiraAPI {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        try(CloseableHttpResponse response = httpClient.execute(httpGet)) {
+        try(CloseableHttpClient httpClient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpClient.execute(httpGet)) {
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
 
@@ -184,11 +198,11 @@ public class JiraAPI {
                 if (line == null) {
                     isEnd = true;
                 } else {
-                    stringBuilder. append(line);
+                    stringBuilder.append(line);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new JiraApiException("Error with connecting to Jira or getting response on it. " + e);
         }
 
         JSONObject jsonMain = new JSONObject(stringBuilder.toString());
@@ -211,17 +225,17 @@ public class JiraAPI {
     //проверить пользователя
     public int findUserJira(final String user) {
         int responseUser = 404;
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+
         HttpGet httpGet = new HttpGet(BASE_URL + JIRA_API_USER + "?key=" + user);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
 
-        CloseableHttpResponse response;
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(httpGet)) {
 
-        try {
-            response = httpClient.execute(httpGet);
             responseUser = response.getStatusLine().getStatusCode();
+
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new JiraApiException("");
         }
 
         return responseUser;

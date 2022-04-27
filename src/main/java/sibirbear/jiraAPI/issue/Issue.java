@@ -1,4 +1,4 @@
-package sibirbear.model;
+package sibirbear.jiraAPI.issue;
 
 /*
  * Модель для хранения данных, которые будут использованы для создания заявки в Jira.
@@ -9,16 +9,18 @@ package sibirbear.model;
  *  nameOrder - название issue;
  *  description - описание issue;
  *  contact - контактная информация для связи по issue;
- *  idanydesk - id для подключения Anydesk;
+ *  idanydesk - id для подключения Anydesk 9 знаков;
  *  department - подразделение, на которое распространяется issue;
  *  attachment - названия файлов в "обменнике" для прикрепления к issue;
  *  isCreated - признак, что issue по указанным параметрам создан в Jira;
  */
 
+import sibirbear.jiraAPI.exceptions.JiraApiException;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Order {
+public class Issue {
 
     private final String project;
     private final String reporter;
@@ -31,7 +33,15 @@ public class Order {
     private final List<String> attachment;
     private boolean isCreated;
 
-    public Order(String project, String reporter) {
+    private final static int ID_ANYDESK_LENGTH = 9;
+
+    public Issue(String project, String reporter) throws JiraApiException {
+        if (isStringNullOrEmpty(project) || isStringNullOrEmpty(reporter)) {
+            throw new JiraApiException("Issue cannot create with empty parameter or NPE." +
+                    "\nParameters: project: "
+                    + project + "; reporter: " + reporter + ";");
+        }
+
         this.project = project;
         this.reporter = reporter;
         this.attachment = new ArrayList<>();
@@ -42,6 +52,10 @@ public class Order {
         return project;
     }
 
+    public String getReporter() {
+        return reporter;
+    }
+
     public String getIssueType() {
         return issueType;
     }
@@ -50,15 +64,15 @@ public class Order {
         this.issueType = issueType;
     }
 
-    public String getReporter() {
-        return reporter;
-    }
-
     public String getNameIssue() {
         return nameIssue;
     }
 
-    public void setNameIssue(String nameIssue) {
+    public void setNameIssue(String nameIssue) throws JiraApiException {
+        if (isStringNullOrEmpty(nameIssue)
+                || nameIssue.replaceAll("\\s+", "").isEmpty()) {
+            throw new JiraApiException("Issue name cannot be Null or empty");
+        }
         this.nameIssue = nameIssue;
     }
 
@@ -66,7 +80,11 @@ public class Order {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(String description) throws JiraApiException {
+        if (isStringNullOrEmpty(description)
+                || description.replaceAll("\\s+", "").isEmpty()) {
+            throw new JiraApiException("Issue description cannot be Null or empty");
+        }
         this.description = description;
     }
 
@@ -74,15 +92,23 @@ public class Order {
         return contact;
     }
 
-    public void setContact(String contact) {
+    public void setContact(String contact) throws JiraApiException {
+        if (isStringNullOrEmpty(contact)
+                || contact.replaceAll("\\s+", "").isEmpty()) {
+            throw new JiraApiException("Contact of Issue author cannot be Null or empty");
+        }
         this.contact = contact;
     }
 
-    public String getIdanydesk() {
+    public String getIdAnydesk() {
         return idanydesk;
     }
 
-    public void setIdanydesk(String idanydesk) {
+    public void setIdanydesk(String idanydesk) throws JiraApiException {
+        if (idanydesk.trim().length() != ID_ANYDESK_LENGTH
+                || !isDigit(idanydesk)) {
+            throw new JiraApiException("ID Anydesk must be 9 numbers. String was: " + idanydesk);
+        }
         this.idanydesk = idanydesk;
     }
 
@@ -108,6 +134,19 @@ public class Order {
 
     public void setCreated(boolean created) {
         isCreated = created;
+    }
+
+    private boolean isDigit(String str) throws NumberFormatException {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isStringNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
     }
 
     @Override

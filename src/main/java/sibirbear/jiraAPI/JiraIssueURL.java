@@ -14,9 +14,13 @@ public class JiraIssueURL {
     public JiraIssueURL(final String key, final String description) {
         this.url = JiraConstants.JIRA_ISSUE_URL_BROWSE + key;
 
-        if (description.length() > JiraConstants.JIRA_ISSUE_URL_DESCRIPTION_LENGTH) {
+        if (description == null) {
+            this.description = "";
+        }
+        else if (description.length() > JiraConstants.JIRA_ISSUE_URL_DESCRIPTION_LENGTH) {
             this.description = description.substring(0, JiraConstants.JIRA_ISSUE_URL_DESCRIPTION_LENGTH) + "...";
-        } else {
+        }
+        else {
             this.description = description;
         }
 
@@ -24,6 +28,16 @@ public class JiraIssueURL {
 
     public String getUrl() {
         return url;
+    }
+
+    /**
+     * Метод, который возвращает URL ссылку на заявку по переданному ключу.
+     * К ключу будет добавлен адрес, по которому размещен сервер Jira
+     * @param key ключ заявки вида ПРОЕКТ-НОМЕР ЗАЯВКИ (TEST-1234)
+     * @return возвращает ссылку на заявку в виде String
+     */
+    public static String getUrl(final String key) {
+        return JiraConstants.JIRA_ISSUE_URL_BROWSE + key;
     }
 
     public String getDescription() {
