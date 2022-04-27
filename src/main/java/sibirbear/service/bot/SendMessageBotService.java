@@ -1,10 +1,6 @@
 package sibirbear.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import sibirbear.jiraAPI.JiraIssueURL;
-import sibirbear.store.StoreOrders;
-
-import java.util.List;
 
 import static sibirbear.service.bot.SendMessageBuilder.*;
 
@@ -43,26 +39,9 @@ public class SendMessageBotService {
         return message;
     }
 
-    public SendMessage listOfIssues(long chatId, List<JiraIssueURL> listIssues) {
-
-        //TODO Убрать отсюда в отдельный класс
-        StringBuilder sb = new StringBuilder();
-        sb.append("*Список заявок:*\n\n");
-
-        if (listIssues.size() == 0) {
-            sb.append("_Открытых заявок, созданных тобой - нет._\n");
-        } else {
-            for (JiraIssueURL jiraIssueURL : listIssues) {
-                String url = "*" + jiraIssueURL.getUrl() + "*\n";
-                String description = "_" + jiraIssueURL.getDescription() + "_\n\n";
-                sb.append(url);
-                sb.append(description);
-            }
-        }
-
-        SendMessage message = createSimpleMessageDeleteKeyboard(chatId, sb.toString());
+    public SendMessage listOfIssues(long chatId, String listIssues) {
+        SendMessage message = createSimpleMessageDeleteKeyboard(chatId, listIssues);
         message.enableMarkdown(true);
-
         return message;
     }
 
@@ -87,6 +66,11 @@ public class SendMessageBotService {
                 SendMessageConstantText.ENTER_ISSUE_NAME.getText());
     }
 
+    public SendMessage writeNameIssueError(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.ENTER_ISSUE_NAME_ERROR.getText());
+    }
+
     public SendMessage messageChooseYesOrNo(long chatId, String enteredText) {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.CHECK_ENTER_TEXT.getText() + enteredText,
@@ -99,9 +83,21 @@ public class SendMessageBotService {
                 buttonBotService.cancelButton());
     }
 
+    public SendMessage writeDescriptionIssueError(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ENTER_DESCRIPTION_ISSUE_ERROR.getText(),
+                buttonBotService.cancelButton());
+    }
+
     public SendMessage messageUserContacts(long chatId) {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.ENTER_CONTACTS.getText(),
+                buttonBotService.cancelButton());
+    }
+
+    public SendMessage messageUserContactsError(long chatId) {
+        return createMessageWithKeyboard(chatId,
+                SendMessageConstantText.ENTER_CONTACTS_ERROR.getText(),
                 buttonBotService.cancelButton());
     }
 
@@ -123,10 +119,14 @@ public class SendMessageBotService {
                 buttonBotService.cancelButton());
     }
 
-    public SendMessage messageEND(long chatId, StoreOrders storeOrders) {
-        return createMessageWithKeyboard(chatId,
-                storeOrders.get(chatId).toString(),
-                buttonBotService.cancelButton());
+    public SendMessage messageEndCreatingIssue(long chatId, String key) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.END_CREATING_ISSUE.getText() + key);
+    }
+
+    public SendMessage messageCreatingIssueError(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.CREATING_ISSUE_ERROR.getText());
     }
 
     public SendMessage returnToPrimaryMenu(long chatId) {

@@ -1,6 +1,9 @@
 package sibirbear.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -10,21 +13,26 @@ import sibirbear.config.Config;
 import sibirbear.jiraAPI.JiraAPI;
 import sibirbear.jiraAPI.JiraConstants;
 import sibirbear.jiraAPI.JiraIssueURL;
-import sibirbear.model.Order;
+import sibirbear.jiraAPI.exceptions.JiraApiException;
+import sibirbear.jiraAPI.issue.Issue;
 import sibirbear.model.Steps;
 import sibirbear.model.User;
 import sibirbear.service.CheckDivision;
-import sibirbear.service.CreateOrderJira;
+import sibirbear.jiraAPI.CreateJiraIssue;
 import sibirbear.service.bot.ButtonsNameConstants;
 import sibirbear.service.bot.SendMessageBotService;
 import sibirbear.store.StoreOrders;
 import sibirbear.store.StoreUsers;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import static sibirbear.core.CoreConstants.*;
+import static sibirbear.jiraAPI.JiraIssueURL.getUrl;
+import static sibirbear.jiraAPI.issue.GenerateStringFromList.generate;
+import static sibirbear.service.CheckDivision.isDivisionReal;
 
 
 /*
@@ -33,13 +41,13 @@ import static sibirbear.core.CoreConstants.*;
 
 public class CoreBot extends TelegramLongPollingBot {
 
+    private static final Logger log = LogManager.getLogger(CoreBot.class);
     private final String token = Config.getConfigTelegramSettings().getToken();
     private final String botName = Config.getConfigTelegramSettings().getBotName();
     private final SendMessageBotService sendMessageBotService = new SendMessageBotService();
     private final StoreUsers storeUser = new StoreUsers();
     private final StoreOrders storeOrders = new StoreOrders();
     private final JiraAPI jiraApi = new JiraAPI(Config.getUrlJira(),Config.getAuthJira());
-    private final static int ID_ANYDESK_LENGTH = 9;
     private final static int DIVISION_NUMBER_LENGTH = 4;
 
     @Override
@@ -60,6 +68,8 @@ public class CoreBot extends TelegramLongPollingBot {
     private void scenarioMessageText(Update update) {
         long userChatId = update.getMessage().getChatId();
         String userEnteredText = update.getMessage().getText();
+
+        System.out.println(userChatId);
 
         //проверка, что пользователь сохранен в списке пользователей и не "старый"
         if (storeUser.get(userChatId) != null && storeUser.get(userChatId).isDateExpired()) {
@@ -86,14 +96,17 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 //Авторизация
                 case STEP100:
-
                     //получаем текст из сообщения пользователя, предположительно логин
-                    String loginUser = update.getMessage().getText();
+                    String loginUser = update.getMessage().getText().toLowerCase();
                     executeMessage(sendMessageBotService.awaitingMessage(userChatId));
 
+                    log.info("[" + getClass() + "] " + userChatId + " STEP100 - Autorization: " + loginUser);
+
                     //перенести в Jira API
-                    int result = jiraApi.findUserJira(loginUser.toLowerCase(Locale.ROOT));
+                    int result = jiraApi.findUserJira(loginUser);
                     //------------------------------
+
+                    log.info("[" + getClass() + "] " + userChatId + " STEP100 - Autorization Result: " + result);
 
                     if (result == HTTP_OK) {
                         storeUser.get(userChatId).setUserName(loginUser);
@@ -107,27 +120,29 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 //Отработка кнопок меню
                 case STEP101:
+                    log.info("[" + getClass() + "] " + userChatId + " STEP101 - Main menu");
+
                     if (ButtonsNameConstants.CREATE_ISSUE.equals(update.getMessage().getText())) {
                         storeUser.get(userChatId).updateStep(Steps.STEP120);
                         executeMessage(sendMessageBotService.chooseTypeIssueMessage(userChatId));
                     }
 
-
-                    //TODO Тут затык надо подумать как переход сделать
                     if (ButtonsNameConstants.LIST_ISSUES.equals(update.getMessage().getText())) {
                         storeUser.get(userChatId).updateStep(Steps.STEP110);
 
                     }
 
-                    //break;
-
                 //Список заявок
                 case STEP110:
+
+                    log.info("[" + getClass() + "] " + userChatId + " STEP110 - List orders");
+
                     if (storeUser.get(userChatId).getStep().equals(Steps.STEP110)) {
                         executeMessage(sendMessageBotService.awaitingMessage(userChatId));
                         List<JiraIssueURL> j = jiraApi.listIssues(storeUser.get(userChatId).getUserName());
+                        String listIssues = generate(j);
 
-                        executeMessage(sendMessageBotService.listOfIssues(userChatId, j));
+                        executeMessage(sendMessageBotService.listOfIssues(userChatId, listIssues));
 
                         executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
                         storeUser.get(userChatId).updateStep(Steps.STEP999);
@@ -138,20 +153,22 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Выбор проекта
                 case STEP120:
-                    String project = JiraConstants.PROJECT_FRANCH;
-                    String issueType = JiraConstants.ISSUE_TYPE_REGULAR;
+                    log.info("[" + getClass() + "] " + userChatId + " STEP120 - Project choose");
+
+                    String project = JiraConstants.JIRA_PROJECT_FRANCH;
+                    String issueType = JiraConstants.JIRA_ISSUE_TYPE_REGULAR;
 
                     if (ButtonsNameConstants.IT.equals(userEnteredText)) {
-                        project = JiraConstants.PROJECT_SUPPORT;
+                        project = JiraConstants.JIRA_PROJECT_SUPPORT;
                     }
                     if (ButtonsNameConstants.GOODS.equals(userEnteredText)) {
-                        issueType = JiraConstants.ISSUE_TYPE_CREATE_GOODS;
+                        issueType = JiraConstants.JIRA_ISSUE_TYPE_CREATE_GOODS;
                     }
                     if (ButtonsNameConstants.REPAIR.equals(userEnteredText)) {
-                        issueType = JiraConstants.ISSUE_TYPE_REPAIR;
+                        issueType = JiraConstants.JIRA_ISSUE_TYPE_REPAIR;
                     }
 
-                    storeOrders.save(userChatId, new Order(project, storeUser.get(userChatId).getUserName()));
+                    storeOrders.save(userChatId, new Issue(project, storeUser.get(userChatId).getUserName()));
                     storeOrders.get(userChatId).setIssueType(issueType);
 
                     storeUser.get(userChatId).updateStep(Steps.STEP121);
@@ -162,11 +179,13 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 //Создание заявки. Выбор подразделения
                 case STEP121:
-                    CheckDivision checkDivision = new CheckDivision();
+                    log.info("[" + getClass() + "] " + userChatId + " STEP121 - Department choose");
+
+                    //CheckDivision checkDivision = new CheckDivision();
                     executeMessage((sendMessageBotService.awaitingMessage(userChatId)));
 
                     if (userEnteredText.length() == DIVISION_NUMBER_LENGTH
-                            && checkDivision.isDivisionReal(userEnteredText)) {
+                            && isDivisionReal(userEnteredText)) {
                         storeUser.get(userChatId).updateStep(Steps.STEP122);
                         storeOrders.get(userChatId).setDepartment(userEnteredText);
                         executeMessage(sendMessageBotService.writeNameIssue(userChatId));
@@ -178,77 +197,119 @@ public class CoreBot extends TelegramLongPollingBot {
 
                 // Создание заявки. Название заявки
                 case STEP122:
-                    storeOrders.get(userChatId).setNameIssue(userEnteredText);
-                    storeUser.get(userChatId).updateStep(Steps.STEP123);
-                    executeMessage(sendMessageBotService.writeDescriptionIssue(userChatId));
+                    log.info("[" + getClass() + "] " + userChatId + " STEP122 - Name issue");
+
+                    try {
+                        storeOrders.get(userChatId).setNameIssue(userEnteredText);
+                        storeUser.get(userChatId).updateStep(Steps.STEP123);
+                        executeMessage(sendMessageBotService.writeDescriptionIssue(userChatId));
+                    } catch (JiraApiException e) {
+                        executeMessage(sendMessageBotService.writeNameIssueError(userChatId));
+                    }
 
                     break;
 
                 // Создание заявки. Описание
                 case STEP123:
-                    storeOrders.get(userChatId).setDescription(userEnteredText);
-                    storeUser.get(userChatId).updateStep(Steps.STEP124);
-                    executeMessage(sendMessageBotService.messageUserContacts(userChatId));
+                    log.info("[" + getClass() + "] " + userChatId + " STEP123 - Description");
+
+                    try {
+                        storeOrders.get(userChatId).setDescription(userEnteredText);
+                        storeUser.get(userChatId).updateStep(Steps.STEP124);
+                        executeMessage(sendMessageBotService.messageUserContacts(userChatId));
+                    } catch (JiraApiException e) {
+                        executeMessage(sendMessageBotService.writeDescriptionIssueError(userChatId));
+                    }
 
                     break;
 
                 // Создание заявки. Контактные данные
                 case STEP124:
-                    storeOrders.get(userChatId).setContact(userEnteredText);
-                    if (Objects.equals(storeOrders.get(userChatId).getIssueType(), JiraConstants.ISSUE_TYPE_REGULAR)) {
-                        storeUser.get(userChatId).updateStep(Steps.STEP125);
-                        executeMessage(sendMessageBotService.messageEnterAnyDeskID(userChatId));
-                    } else {
-                        storeUser.get(userChatId).updateStep(Steps.STEP126);
-                        executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                    log.info("[" + getClass() + "] " + userChatId + " STEP124 - Contact");
+                    try {
+                        storeOrders.get(userChatId).setContact(userEnteredText);
+
+                        if (Objects.equals(storeOrders.get(userChatId).getIssueType(), JiraConstants.JIRA_ISSUE_TYPE_REGULAR)) {
+                            storeUser.get(userChatId).updateStep(Steps.STEP125);
+                            executeMessage(sendMessageBotService.messageEnterAnyDeskID(userChatId));
+                        } else {
+                            storeUser.get(userChatId).updateStep(Steps.STEP126);
+                            executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                        }
+                    } catch (JiraApiException e) {
+                        executeMessage(sendMessageBotService.messageUserContactsError(userChatId));
                     }
 
                     break;
 
                 // Создание заявки. AnyDesk
                 case STEP125:
-                    if (userEnteredText.trim().length() != ID_ANYDESK_LENGTH) {
-                        executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
-                    } else {
-                        storeUser.get(userChatId).updateStep(Steps.STEP126);
+                    log.info("[" + getClass() + "] " + userChatId + " STEP125 - AD");
+                    try {
                         storeOrders.get(userChatId).setIdanydesk(userEnteredText);
+                        storeUser.get(userChatId).updateStep(Steps.STEP126);
                         executeMessage(sendMessageBotService.messageAddAttachments(userChatId));
+                    } catch (JiraApiException e){
+                        executeMessage(sendMessageBotService.messageWrongAnyDeskID(userChatId));
+
                     }
 
                     break;
 
                 // Создание заявки. Прикрепление доп.файлов
                 case STEP126:
-                    // TODO: Добавить сохранение в temp директорию до загрузки, предусмотреть очистку зависших
-                    System.out.println(1);
-                    String id;
+                    log.info("[" + getClass() + "] " + userChatId + " STEP126 - Attachment");
+
+                    String id = "1";
                     if (update.getMessage().getPhoto() != null) {
-                        System.out.println(2);
-                        id = update.getMessage().getPhoto().get(3).getFileId();
-                        storeOrders.get(userChatId).addAttachmentFile(id);
+                        id = update.getMessage().getPhoto().get(TELEGRAM_PHOTO_INDEX).getFileId();
                     } else if (update.getMessage().getDocument() != null) {
-                        System.out.println(3);
                         id = update.getMessage().getDocument().getFileId();
-                        storeOrders.get(userChatId).addAttachmentFile(id);
                     }
-                    System.out.println(4);
+
+                    GetFile getFile = new GetFile();
+                    getFile.setFileId(id);
+
+                    try {
+                        org.telegram.telegrambots.meta.api.objects.File fileTG = execute(getFile);
+                        //String ext = FilenameUtils.getExtension(String.valueOf(fileTG.getFilePath()));
+                        String[] str = String.valueOf(fileTG.getFilePath()).split("/");
+                        String fileName = Arrays.stream(str).skip(str.length - 1).findFirst().orElse("untitled");
+
+                        log.info("[" + getClass() + "] " + userChatId + " STEP126 - add file: " + fileName);
+
+                        File file = downloadFile(fileTG, new File(
+                                "projects-logs/JiraTelegramBot/TempImage/"
+                                + userChatId
+                                + "_" + fileName)); //+ "." + ext));
+
+                        storeOrders.get(userChatId).addAttachmentFile(file.getPath());
+
+                    } catch (TelegramApiException e) {
+                        log.error("[" + getClass() + "] " + userChatId + " STEP126 - Attachment " + e.getMessage());
+                    }
 
                     break;
 
                 //Создание заявки. Проверка введенных данных
                 case STEP127:
+                    log.info("[" + getClass() + "] " + userChatId + " STEP127 - Creating issue in Jira...");
 
-                    // DELETE AFTER TEST
-                            System.out.println("Creating issue...");
-                            System.out.println(storeOrders.get(userChatId).isCreated());
+                    try {
+                        String key = CreateJiraIssue.createJiraIssue(jiraApi, storeOrders.get(userChatId));
 
-                    CreateOrderJira.createJiraIssue(jiraApi, storeOrders.get(userChatId));
+                        if (storeOrders.get(userChatId).getAttachment() != null) {
+                            jiraApi.addMultiAttachment(key, storeOrders.get(userChatId).getAttachment());
+                        }
 
-                            System.out.println(storeOrders.get(userChatId).isCreated() + "\n");
+                        log.info("[" + getClass() + "] " + userChatId + " STEP127 -  Issue: " + storeOrders.get(userChatId).toString());
+                        executeMessage(sendMessageBotService.messageEndCreatingIssue(userChatId, getUrl(key)));
 
-                    executeMessage(sendMessageBotService.messageEND(userChatId, storeOrders));
+                    } catch (JiraApiException e) {
+                        storeUser.get(userChatId).updateStep(Steps.STEP997);
+                        executeMessage(sendMessageBotService.messageCreatingIssueError(userChatId));
+                    }
 
-                    // DELETE AFTER TEST
 
                     //break;
 
@@ -262,9 +323,12 @@ public class CoreBot extends TelegramLongPollingBot {
                 // Отмена действия
                 case STEP998:
                     storeOrders.delete(userChatId);
+                    log.info("[" + getClass() + "] " + userChatId + " STEP998 - Deleting issue params in map...");
+                    log.info("[" + getClass() + "] " + userChatId + " STEP998 -  Issue: " + storeOrders.contains(userChatId));
 
                 // Возврат в меню
                 case STEP999:
+                    log.info("[" + getClass() + "] " + userChatId + " STEP999 -  end action ");
                     storeUser.get(userChatId).updateStep(Steps.STEP101);
                     executeMessage(sendMessageBotService.returnToPrimaryMenu(userChatId));
                     executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
