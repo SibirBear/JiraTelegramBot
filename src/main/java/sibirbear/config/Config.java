@@ -13,6 +13,7 @@ public class Config {
 
     public static final String APP_NAME = "JiraTelegramBot";
     private static final String CONFIG_PATH = "projects-configs/";
+    private static final String LOGS_PATH = "projects-logs/";
 
     private static ConfigTelegramSettings configTelegramSettings;
     private static ConfigOracleDB configOracleDB;
@@ -20,6 +21,7 @@ public class Config {
     private static String authJira;
     private static String urlJira;
     private static String pathToExchange;
+    private static int daysForReAuth;
 
     private static Config read(Properties properties) {
 
@@ -36,6 +38,7 @@ public class Config {
         String dbOracleUrl = properties.getProperty("DB_ORACLE_URL");
         String dbOracleUser = properties.getProperty("DB_ORACLE_USER");
         String dbOraclePass = properties.getProperty("DB_ORACLE_PASS");
+        daysForReAuth = Integer.parseInt(properties.getProperty("DAYS_FOR_RE_AUTH"));
 
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
         configOracleDB = new ConfigOracleDB(dbOracleUrl, dbOracleUser,dbOraclePass);
@@ -62,7 +65,11 @@ public class Config {
     }
 
     public static String getPathToExchange() {
-        return pathToExchange;
+        return LOGS_PATH + APP_NAME + pathToExchange;
+    }
+
+    public static int getDaysForReAuth() {
+        return daysForReAuth;
     }
 
     public static ConfigOracleDB getConfigOracleDB() {

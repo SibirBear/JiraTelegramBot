@@ -279,7 +279,7 @@ public class CoreBot extends TelegramLongPollingBot {
                         log.info("[" + getClass() + "] " + userChatId + " STEP126 - add file: " + fileName);
 
                         File file = downloadFile(fileTG, new File(
-                                "projects-logs/JiraTelegramBot/TempImage/"
+                                Config.getPathToExchange()
                                 + userChatId
                                 + "_" + fileName)); //+ "." + ext));
 

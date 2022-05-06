@@ -1,5 +1,7 @@
 package sibirbear.model;
 
+import sibirbear.config.Config;
+
 import java.time.LocalDate;
 
 /*
@@ -19,7 +21,7 @@ public class User {
         this.userName = userName;
         this.date = LocalDate.now();
         this.step = step;
-        this.expiredDate = date.minusDays(8);
+        this.expiredDate = date.minusDays(Config.getDaysForReAuth());
     }
 
     public String getUserName() {
