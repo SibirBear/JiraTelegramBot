@@ -46,7 +46,7 @@ public class User {
     }
 
     public boolean isDateExpired() {
-        return !LocalDate.now().isBefore(expiredDate);
+        return LocalDate.now().isAfter(expiredDate);
     }
 
     @Override

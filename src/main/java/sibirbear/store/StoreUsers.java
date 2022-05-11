@@ -30,6 +30,7 @@ public class StoreUsers implements IStore<User> {
         storeUsers.remove(chatId);
     }
 
+    @Override
     public Map<Long, User> getAll() {
         return storeUsers;
     }
