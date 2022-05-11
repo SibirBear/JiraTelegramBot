@@ -5,6 +5,7 @@ package sibirbear.jiraAPI.issue;
  * Параметры:
  *  project - id проекта;
  *  reporter - автор issue;
+ *  creationTimeIssue - время создания;
  *  issueType - id issue;
  *  nameOrder - название issue;
  *  description - описание issue;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Issue {
 
@@ -155,6 +157,40 @@ public class Issue {
 
     private boolean isStringNullOrEmpty(String str) {
         return str == null || str.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Issue)) return false;
+        Issue issue = (Issue) o;
+        return isCreated == issue.isCreated
+                && project.equals(issue.project)
+                && reporter.equals(issue.reporter)
+                && creationTimeIssue.equals(issue.creationTimeIssue)
+                && Objects.equals(issueType, issue.issueType)
+                && Objects.equals(nameIssue, issue.nameIssue)
+                && Objects.equals(description, issue.description)
+                && Objects.equals(contact, issue.contact)
+                && Objects.equals(idanydesk, issue.idanydesk)
+                && Objects.equals(department, issue.department)
+                && Objects.equals(attachment, issue.attachment);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                project,
+                reporter,
+                creationTimeIssue,
+                issueType,
+                nameIssue,
+                description,
+                contact,
+                idanydesk,
+                department,
+                attachment,
+                isCreated);
     }
 
     @Override
