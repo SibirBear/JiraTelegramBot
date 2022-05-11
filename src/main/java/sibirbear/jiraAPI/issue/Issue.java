@@ -17,6 +17,8 @@ package sibirbear.jiraAPI.issue;
 
 import sibirbear.jiraAPI.exceptions.JiraApiException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class Issue {
 
     private final String project;
     private final String reporter;
+    private final LocalDateTime creationTimeIssue;
     private String issueType;
     private String nameIssue;
     private String description;
@@ -44,6 +47,7 @@ public class Issue {
 
         this.project = project;
         this.reporter = reporter;
+        this.creationTimeIssue = LocalDateTime.now();
         this.attachment = new ArrayList<>();
         this.isCreated = false;
     }
@@ -54,6 +58,10 @@ public class Issue {
 
     public String getReporter() {
         return reporter;
+    }
+
+    public LocalDateTime getCreationTimeIssue() {
+        return creationTimeIssue;
     }
 
     public String getIssueType() {

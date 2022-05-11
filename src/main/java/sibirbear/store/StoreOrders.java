@@ -31,4 +31,8 @@ public class StoreOrders implements IStore<Issue>{
     public void delete(long chatId) {
         storeOrders.remove(chatId);
     }
+
+    public Map<Long, Issue> getAll() {
+        return storeOrders;
+    }
 }
