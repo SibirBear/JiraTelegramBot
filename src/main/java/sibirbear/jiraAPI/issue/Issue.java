@@ -159,16 +159,19 @@ public class Issue {
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "Issue{" +
                 "project='" + project + '\'' +
                 ", reporter='" + reporter + '\'' +
+                ", creationTimeIssue=" + creationTimeIssue +
                 ", issueType='" + issueType + '\'' +
-                ", nameOrder='" + nameIssue + '\'' +
+                ", nameIssue='" + nameIssue + '\'' +
                 ", description='" + description + '\'' +
                 ", contact='" + contact + '\'' +
+                ", idanydesk='" + idanydesk + '\'' +
                 ", department='" + department + '\'' +
-                ", attachment=" + getAttachment().toString() +
+                ", attachment=" + attachment +
                 ", isCreated=" + isCreated +
-                '}';
+                "}\n";
     }
+
 }

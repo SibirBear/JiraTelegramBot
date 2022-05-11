@@ -32,7 +32,15 @@ public class StoreOrders implements IStore<Issue>{
         storeOrders.remove(chatId);
     }
 
+    @Override
     public Map<Long, Issue> getAll() {
         return storeOrders;
+    }
+
+    @Override
+    public String toString() {
+        return "StoreOrders{" +
+                "storeOrders=" + storeOrders +
+                '}';
     }
 }
