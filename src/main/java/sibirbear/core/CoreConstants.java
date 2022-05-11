@@ -10,5 +10,6 @@ public class CoreConstants {
     public static final String CANCEL = ButtonsNameConstants.CANCEL;
     public static final String DONE = ButtonsNameConstants.DONE;
     public static final int TELEGRAM_PHOTO_INDEX = 3;
+    public static final String NOT_AUTH = "not authorization";
 
 }

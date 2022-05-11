@@ -3,6 +3,7 @@ package sibirbear.model;
 import sibirbear.config.Config;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 /*
  * Модель для хранения пользователя Jira с датой авторизации и номером следующего не завершенного шага.
@@ -21,7 +22,7 @@ public class User {
         this.userName = userName;
         this.date = LocalDate.now();
         this.step = step;
-        this.expiredDate = date.minusDays(Config.getDaysForReAuth());
+        this.expiredDate = date.plusDays(Config.getDaysForReAuth());
     }
 
     public String getUserName() {
@@ -40,8 +41,28 @@ public class User {
         this.step = step;
     }
 
+    public LocalDate getDateAuth() {
+        return date;
+    }
+
     public boolean isDateExpired() {
-        return LocalDate.now().isBefore(expiredDate);
+        return !LocalDate.now().isBefore(expiredDate);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return userName.equals(user.userName)
+                && Objects.equals(date, user.date)
+                && step == user.step
+                && Objects.equals(expiredDate, user.expiredDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName, date, step, expiredDate);
     }
 
     @Override
@@ -51,6 +72,6 @@ public class User {
                 ", date=" + date +
                 ", step=" + step +
                 ", expiredDate=" + expiredDate +
-                '}';
+                '}' + "\n";
     }
 }
