@@ -371,6 +371,10 @@ public class CoreBot extends TelegramLongPollingBot {
         return storeUsers;
     }
 
+    public StoreOrders getStoreOrders () {
+        return storeOrders;
+    }
+
     @Override
     public String getBotToken() {
         return token;
