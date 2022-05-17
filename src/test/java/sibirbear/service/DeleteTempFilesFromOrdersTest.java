@@ -47,7 +47,7 @@ public class DeleteTempFilesFromOrdersTest {
     @Test
     void deleteTempFilesOrdersTest() throws IOException {
         DeleteTempFilesOrders df = new DeleteTempFilesOrders(storeOrders);
-        df.deleteTempFilesOrders();
+        df.execute();
 
         Assertions.assertEquals(
                 (int) Files.walk(Paths.get(Config.getPathToExchange()))

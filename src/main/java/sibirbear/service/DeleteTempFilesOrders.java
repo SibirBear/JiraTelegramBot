@@ -19,7 +19,7 @@ public class DeleteTempFilesOrders {
         this.listFilesFromIssues = new ArrayList<>();
     }
 
-    public void deleteTempFilesOrders() {
+    public void execute() {
         List<String> listFiles = new DeleteTempFiles().getListOfTempFiles();
 
         listFiles.removeAll(getListFilesFromAttachment());
