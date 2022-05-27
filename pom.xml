@@ -6,8 +6,8 @@
 
     <groupId>org.example</groupId>
     <artifactId>JiraTelegramBot</artifactId>
-    <version>1.0</version>
-<!--    <packaging>war</packaging>-->
+    <version>1.1</version>
+    <packaging>war</packaging>
 
     <dependencies>
         <dependency>
@@ -56,5 +56,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
