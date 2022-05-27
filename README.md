@@ -27,3 +27,5 @@ DB_ORACLE_USER =
 DB_ORACLE_PASS = 
 
 ``` 
+
+Put filled configuration file to source path. Source path you can change in src/main/java/info/fermercentr/config/Config.java by constant "CONFIG_PATH".
