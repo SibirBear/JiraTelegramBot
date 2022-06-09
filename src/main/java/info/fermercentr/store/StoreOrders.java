@@ -1,5 +1,6 @@
 package info.fermercentr.store;
 
+import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import info.fermercentr.jiraAPI.issue.Issue;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class StoreOrders implements IStore<Issue>{
     @Override
     public Issue get(long chatId) {
         if (!contains(chatId)) {
-            return null;
+            throw new JiraApiException("ERROR! There`s no such of user in store!");
         }
         return storeOrders.get(chatId);
     }

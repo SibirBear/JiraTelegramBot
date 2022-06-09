@@ -91,7 +91,7 @@ public class CoreBot extends TelegramLongPollingBot {
         // if the user is not in the list of users, we record the chat ID with the sign of not logged in
         // user and send a request for authorization (more precisely, we inform the user to enter the login)
         if (!storeUsers.contains(userChatId)) {
-            LOG.info("[" + getClass() + "] DONT CONTAINS USER " + userChatId);
+            LOG.info("[" + getClass() + "] DON`T CONTAINS USER " + userChatId);
             executeMessage(sendMessageBotService.authorizationLoginMessage(userChatId));
             storeUsers.save(userChatId, new User(NOT_AUTH, Steps.STEP100));
         } else {
@@ -116,11 +116,11 @@ public class CoreBot extends TelegramLongPollingBot {
                     String loginUser = update.getMessage().getText().toLowerCase();
                     executeMessage(sendMessageBotService.awaitingMessage(userChatId));
 
-                    LOG.info("[" + getClass() + "] " + userChatId + " STEP100 - Autorization: " + loginUser);
+                    LOG.info("[" + getClass() + "] " + userChatId + " STEP100 - Authorization: " + loginUser);
 
                     int result = jiraApi.findUserJira(loginUser);
 
-                    LOG.info("[" + getClass() + "] " + userChatId + " STEP100 - Autorization Result: " + result);
+                    LOG.info("[" + getClass() + "] " + userChatId + " STEP100 - Authorization Result: " + result);
 
                     if (result == HTTP_OK) {
                         storeUsers.get(userChatId).setUserName(loginUser);
@@ -325,7 +325,7 @@ public class CoreBot extends TelegramLongPollingBot {
                             jiraApi.addMultiAttachment(key, storeOrders.get(userChatId).getAttachment());
                         }
 
-                        LOG.info("[" + getClass() + "] " + userChatId + " STEP127 -  Issue: " + storeOrders.get(userChatId).toString());
+                        LOG.info("[" + getClass() + "] " + userChatId + " STEP127 - Issue: " + storeOrders.get(userChatId).toString());
                         executeMessage(sendMessageBotService.messageEndCreatingIssue(userChatId, getUrl(key)));
 
                     } catch (JiraApiException e) {
@@ -346,12 +346,12 @@ public class CoreBot extends TelegramLongPollingBot {
                 case STEP998:
                     storeOrders.delete(userChatId);
                     LOG.info("[" + getClass() + "] " + userChatId + " STEP998 - Deleting issue params in map...");
-                    LOG.info("[" + getClass() + "] " + userChatId + " STEP998 -  Issue: " + storeOrders.contains(userChatId));
+                    LOG.info("[" + getClass() + "] " + userChatId + " STEP998 - Issue: " + storeOrders.contains(userChatId));
 
                 // Возврат в меню
                 // Return to Main menu
                 case STEP999:
-                    LOG.info("[" + getClass() + "] " + userChatId + " STEP999 -  end action, return tu Main menu ");
+                    LOG.info("[" + getClass() + "] " + userChatId + " STEP999 - end action, return to Main menu ");
                     storeUsers.get(userChatId).updateStep(Steps.STEP101);
                     executeMessage(sendMessageBotService.returnToPrimaryMenu(userChatId));
                     executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
