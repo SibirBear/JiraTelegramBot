@@ -16,9 +16,9 @@ public class StoreOrders implements IStore<Issue>{
     }
 
     @Override
-    public Issue get(long chatId) {
+    public Issue get(long chatId) throws JiraApiException{
         if (!contains(chatId)) {
-            throw new JiraApiException("ERROR! There`s no such of user in store!");
+            throw new JiraApiException("ERROR! There are no order for user: " + chatId + "!");
         }
         return storeOrders.get(chatId);
     }
