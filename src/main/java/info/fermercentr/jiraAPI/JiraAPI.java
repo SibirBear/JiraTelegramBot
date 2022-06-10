@@ -239,8 +239,8 @@ public class JiraAPI {
 
             responseUser = response.getStatusLine().getStatusCode();
 
-        } catch (IOException e) {
-            throw new JiraApiException("");
+        } catch (Exception e) {
+            throw new JiraApiException("ERROR! FindUserJira is corrupt. " + e);
         }
 
         return responseUser;
