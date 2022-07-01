@@ -3,6 +3,8 @@ package info.fermercentr.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /*
@@ -24,10 +26,11 @@ public class Config {
     private static String urlJira;
     private static String pathToExchange;
     private static int daysForReAuth;
+    private static String helpVideoURL;
 
     private static Config read(Properties properties) {
 
-        try(InputStream is = new FileInputStream(CONFIG_PATH + APP_NAME + "/config.properties")) {
+        try(InputStream is = Files.newInputStream(Paths.get(CONFIG_PATH + APP_NAME + "/config.properties"))) {
             properties.load(is);
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,6 +44,7 @@ public class Config {
         String dbOracleUser = properties.getProperty("DB_ORACLE_USER");
         String dbOraclePass = properties.getProperty("DB_ORACLE_PASS");
         daysForReAuth = Integer.parseInt(properties.getProperty("DAYS_FOR_RE_AUTH"));
+        helpVideoURL = properties.getProperty("HELP_VIDEO_URL");
 
         configTelegramSettings = new ConfigTelegramSettings(token, botName);
         configOracleDB = new ConfigOracleDB(dbOracleUrl, dbOracleUser,dbOraclePass);
@@ -77,4 +81,9 @@ public class Config {
     public static ConfigOracleDB getConfigOracleDB() {
         return configOracleDB;
     }
+
+    public static String getHelpVideoURL() {
+        return helpVideoURL;
+    }
+
 }

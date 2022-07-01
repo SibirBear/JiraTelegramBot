@@ -38,6 +38,7 @@ public class Issue {
     private boolean isCreated;
 
     private final static int ID_ANYDESK_LENGTH = 9;
+    private final String REGEX_STRING_TEMPLATE = "[а-яёА-ЯЁ\\w\\s!@#$%&*()+.,:;=|<>?{}\\[\\]~-]+";
 
     public Issue(String project, String reporter) throws JiraApiException {
         if (isStringNullOrEmpty(project) || isStringNullOrEmpty(reporter)) {
@@ -79,7 +80,7 @@ public class Issue {
 
     public void setNameIssue(String nameIssue) throws JiraApiException {
         if (isStringNullOrEmpty(nameIssue)
-                || nameIssue.replaceAll("\\s+", "").isEmpty()) {
+                || isStringInvalid(nameIssue)) {
             throw new JiraApiException("Issue name cannot be Null or empty");
         }
         this.nameIssue = nameIssue;
@@ -91,7 +92,7 @@ public class Issue {
 
     public void setDescription(String description) throws JiraApiException {
         if (isStringNullOrEmpty(description)
-                || description.replaceAll("\\s+", "").isEmpty()) {
+                || isStringInvalid(nameIssue)) {
             throw new JiraApiException("Issue description cannot be Null or empty");
         }
         this.description = description;
@@ -103,7 +104,7 @@ public class Issue {
 
     public void setContact(String contact) throws JiraApiException {
         if (isStringNullOrEmpty(contact)
-                || contact.replaceAll("\\s+", "").isEmpty()) {
+                || isStringInvalid(nameIssue)) {
             throw new JiraApiException("Contact of Issue author cannot be Null or empty");
         }
         this.contact = contact;
@@ -156,6 +157,10 @@ public class Issue {
 
     private boolean isStringNullOrEmpty(String str) {
         return str == null || str.isEmpty();
+    }
+
+    private boolean isStringInvalid(String str) {
+        return !str.matches(REGEX_STRING_TEMPLATE);
     }
 
     @Override

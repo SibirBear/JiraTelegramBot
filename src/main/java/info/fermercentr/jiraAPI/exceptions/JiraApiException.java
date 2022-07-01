@@ -1,8 +1,6 @@
 package info.fermercentr.jiraAPI.exceptions;
 
-import java.io.IOException;
-
-public class JiraApiException extends RuntimeException {
+public class JiraApiException extends Exception {
 
     public JiraApiException() {
         super();

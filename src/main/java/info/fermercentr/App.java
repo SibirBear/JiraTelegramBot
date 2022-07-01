@@ -2,6 +2,7 @@ package info.fermercentr;
 
 import info.fermercentr.config.Config;
 import info.fermercentr.core.CoreBot;
+import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import info.fermercentr.service.CheckDivision;
 import info.fermercentr.tasks.InitTasks;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +42,7 @@ public class App {
 
     @PostConstruct
     public void init() {
+        LOG.info("[" + Config.APP_NAME + "] - Starting application (build 01/07/2022 18-00)...");
         LOG.info("[" + Config.APP_NAME + "] - Trying to init Configuration properties...");
         Config.init();
         LOG.info("[" + Config.APP_NAME + "] - Configuration properties are initialized.");
@@ -60,7 +62,7 @@ public class App {
             initTasks = new InitTasks();
             executeRepeatingTask();
 
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException | JiraApiException e) {
             LOG.error("Error starting app. " + e.getMessage(), e);
         }
 
@@ -104,6 +106,7 @@ public class App {
         try {
             scheduledExecutorService.shutdown();
             LOG.info("[" + Config.APP_NAME + "] - Stop App. Successfully stopped.");
+            LOG.info("[" + Config.APP_NAME + "] ***** End *****");
         } catch (Exception e) {
             LOG.error("[" + Config.APP_NAME + "] - Stop App. ERROR when trying to stop scheduleExecutorService. "
                     + e.getMessage());

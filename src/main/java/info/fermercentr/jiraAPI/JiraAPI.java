@@ -1,5 +1,6 @@
 package info.fermercentr.jiraAPI;
 
+import info.fermercentr.jiraAPI.schedule.JiraScheduleTask;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -35,7 +36,7 @@ import static info.fermercentr.jiraAPI.JiraConstants.JIRA_NAME_ATTACH_FILE;
 
 public class JiraAPI {
 
-    private static final Logger log = LogManager.getLogger(JiraAPI.class);
+    private static final Logger LOG = LogManager.getLogger(JiraAPI.class);
 
     private final String HTTP_HEADER_CONTENT_TYPE_JSON = "application/json";
     private final String HTTP_PROPERTY_ATLAS_TOKEN = "X-Atlassian-Token";
@@ -94,19 +95,18 @@ public class JiraAPI {
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
              BufferedReader bufferedReader = new BufferedReader(
-                     new InputStreamReader(
-                             httpResponse.getEntity().getContent(),
-                             StandardCharsets.UTF_8)
+                 new InputStreamReader(
+                         httpResponse.getEntity().getContent(),
+                         StandardCharsets.UTF_8)
              )
-             ) {
-
+        ) {
             int charIndex;
             while ((charIndex = bufferedReader.read()) != -1) {
                 stringBuilder.append((char) charIndex);
             }
 
         } catch (IOException e) {
-            throw new JiraApiException("Error with create HttpClient for creating issue. " + e);
+        throw new JiraApiException("Error with create HttpClient for creating issue. " + e);
         }
 
         JSONObject json = new JSONObject(stringBuilder.toString());
@@ -140,13 +140,13 @@ public class JiraAPI {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             httpClient.execute(httpPost);
-            log.info("[" + getClass() + "] " + " File: " + fileToAttach + " uploaded successful!");
+            LOG.info("[" + getClass() + "] " + " File: " + fileToAttach + " uploaded successful!");
             result = true;
             boolean deleteResult = fileToAttach.delete();
-            log.info("[" + getClass() + "] " + " File: " + fileToAttach + " deleted successful! " + deleteResult);
+            LOG.info("[" + getClass() + "] " + " File: " + fileToAttach + " deleted successful! " + deleteResult);
 
         } catch (IOException e) {
-            log.error("[" + getClass() + "] " + " ERROR! " + e.getMessage());
+            LOG.error("[" + getClass() + "] " + " ERROR! " + e.getMessage());
             throw new JiraApiException("File " + file + " cannot add to " + issueKey + "\n" + e);
         }
 
@@ -193,6 +193,7 @@ public class JiraAPI {
 
         try(CloseableHttpClient httpClient = HttpClients.createDefault();
             CloseableHttpResponse response = httpClient.execute(httpGet)) {
+
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
 
@@ -228,15 +229,17 @@ public class JiraAPI {
 
     //проверить пользователя
     //check user in jira
-    public int findUserJira(final String user) {
+    public int findUserJira(final String user) throws JiraApiException {
         int responseUser = 404;
 
         HttpGet httpGet = new HttpGet(BASE_URL + JIRA_API_USER + "?key=" + user);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
 
+        LOG.info("[" + getClass() + "] " + " Trying to connect to Jira API...");
+
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(httpGet)) {
-
+            LOG.info("[" + getClass() + "] " + " Connect to Jira API successful!");
             responseUser = response.getStatusLine().getStatusCode();
 
         } catch (Exception e) {

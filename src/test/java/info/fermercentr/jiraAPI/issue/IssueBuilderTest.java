@@ -1,6 +1,7 @@
 package info.fermercentr.jiraAPI.issue;
 
 import info.fermercentr.jiraAPI.JiraConstants;
+import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -9,8 +10,11 @@ class IssueBuilderTest {
     final Issue issueTest = new Issue("project", "reporter");
     final String expected = "{\"fields\":{\"summary\":\"name\",\"issuetype\":{\"id\":\"29\"},\"project\":{\"id\":\"project\"},\"description\":\"Test\\nAnydesk: 123456789\",\"reporter\":{\"name\":\"reporter\"},\"customfield_10231\":\"1234\",\"customfield_10420\":\"contact\"}}";
 
+    IssueBuilderTest() throws JiraApiException {
+    }
+
     @Test
-    void buildTest() {
+    void buildTest() throws JiraApiException {
         issueTest.setIssueType(JiraConstants.JIRA_ISSUE_TYPE_REGULAR);
         issueTest.setNameIssue("name");
         issueTest.setContact("contact");

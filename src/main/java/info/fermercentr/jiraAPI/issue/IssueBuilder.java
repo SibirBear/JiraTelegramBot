@@ -21,7 +21,7 @@ public class IssueBuilder {
         this.issue = issue;
     }
 
-    public String build() {
+    public String build() throws JiraApiException {
         if (!isValid()) {
             throw new JiraApiException("Cannot build issue query: NPE or saved issue data is already used.");
         }

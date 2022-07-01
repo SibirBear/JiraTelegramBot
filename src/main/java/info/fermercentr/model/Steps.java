@@ -6,9 +6,10 @@ package info.fermercentr.model;
 
 public enum Steps {
 
-    STEP100, // Авторизация
-    STEP101, // Отработка кнопок меню
-    STEP102, //
+    STEP100, // Ввод логина
+    STEP101, // Авторизация
+    STEP102, // Отработка кнопок меню
+    STEP103, //
     STEP104, //
     STEP105, //
     STEP110, // Список заявок

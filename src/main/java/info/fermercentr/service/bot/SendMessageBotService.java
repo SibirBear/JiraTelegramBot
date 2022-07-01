@@ -24,6 +24,10 @@ public class SendMessageBotService {
         return createSimpleMessage(chatId, SendMessageConstantText.AUTH.getText());
     }
 
+    public SendMessage userLogOut(long chatId) {
+        return createSimpleMessage(chatId, SendMessageConstantText.LOGOUT.getText());
+    }
+
     public SendMessage awaitingMessage(long chatId) {
         return createSimpleMessage(chatId, SendMessageConstantText.AWAITING.getText());
     }
@@ -33,10 +37,20 @@ public class SendMessageBotService {
                 : createSimpleMessage(chatId, SendMessageConstantText.AUTH_ERROR.getText());
     }
 
+    public SendMessage missOrderMessage(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.MISS_ORDER.getText());
+    }
+
     public SendMessage primaryMenuMessage(long chatId) {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.DESIRE_CREATE_ISSUE.getText(),
                 buttonBotService.primaryMenuButtonsMessage());
+    }
+
+    public SendMessage helpMessage(long chatId, String helpVideoUrl) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.HELP.getText() + helpVideoUrl);
     }
 
     public SendMessage chooseTypeIssueMessage(long chatId) {
@@ -57,6 +71,11 @@ public class SendMessageBotService {
         return createMessageWithKeyboard(chatId,
                 SendMessageConstantText.RETURN_TO_PRIMARY_MENU_BUTTON.getText(),
                 buttonBotService.returnToPrimaryMenuButtonMessage());
+    }
+
+    public SendMessage errorNullProjectOrReporter(long chatId) {
+        return createSimpleMessageDeleteKeyboard(chatId,
+                SendMessageConstantText.ERROR_ERROR.getText());
     }
 
     public SendMessage writeDivisionIssue(long chatId) {

@@ -19,8 +19,9 @@ public class ButtonBotService {
     public ReplyKeyboardMarkup primaryMenuButtonsMessage() {
         return setKeyboardMessage(
                 createRowButtonList(
-                        createRowButtons(Collections.singletonList(ButtonsNameConstants.CREATE_ISSUE)),
-                        createRowButtons(Collections.singletonList(ButtonsNameConstants.LIST_ISSUES))));
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.HELP)),
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.LIST_ISSUES)),
+                        createRowButtons(Collections.singletonList(ButtonsNameConstants.CREATE_ISSUE))));
     }
 
     public ReplyKeyboardMarkup chooseTypeIssueMessage() {

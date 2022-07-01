@@ -1,5 +1,6 @@
 package info.fermercentr.service;
 
+import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import info.fermercentr.jiraAPI.issue.Issue;
 import info.fermercentr.store.StoreOrders;
 import org.junit.jupiter.api.AfterAll;
@@ -18,7 +19,7 @@ public class DeleteTempFilesFromOrdersTest {
     static StoreOrders storeOrders = new StoreOrders();
 
     @BeforeAll
-    static void init() throws IOException {
+    static void init() throws IOException, JiraApiException {
         Config.init();
 
         Issue issue1 = new Issue("Project", "Reporter");

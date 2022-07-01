@@ -23,7 +23,7 @@ public class CheckUserAuth {
     //Проверяем, что дата авторизации просрочена и пользователь не создает заявку (шаг 101 - главное меню)
     private boolean checkDateIsExpired() {
         return user.isDateExpired()
-                && Steps.STEP101.equals(user.getStep());
+                && Steps.STEP102.equals(user.getStep());
     }
 
     //Проверяем, что дата добавления записи старше 1 дня и пользователь не авторизован

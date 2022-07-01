@@ -1,5 +1,6 @@
 package info.fermercentr.service;
 
+import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import info.fermercentr.jiraAPI.issue.Issue;
@@ -17,7 +18,7 @@ class CheckOrdersTimeExpiredTest {
     private static CheckOrdersTimeExpired checkAll;
 
     @BeforeAll
-    static void init() throws NoSuchFieldException, IllegalAccessException {
+    static void init() throws NoSuchFieldException, IllegalAccessException, JiraApiException {
 
         //Наполнение тестируемых данных, используя рефлексию для доступа к закрытым полям
         Issue issue1 = new Issue("Project", "Reporter");
