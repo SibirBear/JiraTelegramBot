@@ -92,7 +92,7 @@ public class Issue {
 
     public void setDescription(String description) throws JiraApiException {
         if (isStringNullOrEmpty(description)
-                || isStringInvalid(nameIssue)) {
+                || isStringInvalid(description)) {
             throw new JiraApiException("Issue description cannot be Null or empty");
         }
         this.description = description;
@@ -104,7 +104,7 @@ public class Issue {
 
     public void setContact(String contact) throws JiraApiException {
         if (isStringNullOrEmpty(contact)
-                || isStringInvalid(nameIssue)) {
+                || isStringInvalid(contact)) {
             throw new JiraApiException("Contact of Issue author cannot be Null or empty");
         }
         this.contact = contact;

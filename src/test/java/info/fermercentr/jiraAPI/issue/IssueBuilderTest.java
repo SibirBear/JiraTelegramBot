@@ -5,6 +5,9 @@ import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 class IssueBuilderTest {
 
     final Issue issueTest = new Issue("project", "reporter");
@@ -14,7 +17,7 @@ class IssueBuilderTest {
     }
 
     @Test
-    void buildTest() throws JiraApiException {
+    void buildTestOne() throws JiraApiException {
         issueTest.setIssueType(JiraConstants.JIRA_ISSUE_TYPE_REGULAR);
         issueTest.setNameIssue("name");
         issueTest.setContact("contact");
@@ -26,6 +29,27 @@ class IssueBuilderTest {
 
         Assertions.assertEquals(expected, actual);
 
+    }
+
+    @Test
+    void exceptionTestingIssueName() {
+        Exception exception = assertThrows(JiraApiException.class, () ->
+                issueTest.setNameIssue("name\uD83E\uDD33"));
+        assertEquals("Issue name cannot be Null or empty", exception.getMessage());
+    }
+
+    @Test
+    void exceptionTestingDescription() {
+        Exception exception = assertThrows(JiraApiException.class, () ->
+                issueTest.setDescription("description\uD83E\uDD33"));
+        assertEquals("Issue description cannot be Null or empty", exception.getMessage());
+    }
+
+    @Test
+    void exceptionTestingContact() {
+        Exception exception = assertThrows(JiraApiException.class, () ->
+                issueTest.setContact("contact\uD83E\uDD33"));
+        assertEquals("Contact of Issue author cannot be Null or empty", exception.getMessage());
     }
 
 
