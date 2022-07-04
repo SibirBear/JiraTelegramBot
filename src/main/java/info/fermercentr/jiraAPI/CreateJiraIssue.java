@@ -12,6 +12,9 @@ public class CreateJiraIssue {
 
         String query = new IssueBuilder(issue).build();
         String key = api.httpCreateIssue(query);
+
+        if (key == null) throw new JiraApiException("Field \"key\" cannot be NULL.");
+
         issue.setCreated(true);
 
         return key;

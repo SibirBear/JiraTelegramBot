@@ -18,6 +18,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import info.fermercentr.jiraAPI.exceptions.JiraApiException;
 
@@ -111,7 +112,15 @@ public class JiraAPI {
 
         JSONObject json = new JSONObject(stringBuilder.toString());
 
-        return json.getString("key");
+        //Проверяем есть ли поле key в ответе и записываем его, в противном случае бросаем исключение
+        String resultKey = null;
+        try {
+            resultKey = json.getString("key");
+        } catch (JSONException e) {
+            throw new JiraApiException("Field \"key\" not found in response from Jira.");
+        }
+
+        return resultKey;
 
     }
 

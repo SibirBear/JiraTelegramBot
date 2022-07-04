@@ -200,10 +200,11 @@ public class CoreBot extends TelegramLongPollingBot {
                         List<JiraIssueURL> jiraIssueURLList = jiraApi.listIssues(storeUsers.get(userChatId).getUserName());
                         String listIssues = generate(jiraIssueURLList);
 
-                        storeUsers.get(userChatId).updateStep(Steps.STEP999);
+                        storeUsers.get(userChatId).updateStep(Steps.STEP102);
 
                         executeMessage(sendMessageBotService.listOfIssues(userChatId, listIssues));
                         executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
+                        executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
                     } catch (JiraApiException e) {
                         LOG.error("[" + getClass() + "] " + "ERROR! " + userChatId
                                 + " STEP110 - List of Jira issues: " + e.getMessage());
@@ -430,7 +431,7 @@ public class CoreBot extends TelegramLongPollingBot {
             // Return to Main menu
             case STEP999:
                 LOG.info("[" + getClass() + "] " + userChatId + " STEP999 - end action, return to Main menu ");
-                if (!checkUserAndOrder(userChatId, Steps.STEP999)) break;
+                if (!checkUser(userChatId, Steps.STEP999)) break;
 
                 storeUsers.get(userChatId).updateStep(Steps.STEP102);
                 executeMessage(sendMessageBotService.returnToPrimaryMenu(userChatId));
