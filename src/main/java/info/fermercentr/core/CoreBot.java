@@ -486,9 +486,11 @@ public class CoreBot extends TelegramLongPollingBot {
 
         LOG.error("[" + getClass() + "] " + "ERROR! No saved ORDER in store: " + userChatId
                 + " on step " + step + ". Return to main menu.");
-        storeUsers.get(userChatId).updateStep(Steps.STEP102);
-        executeMessage(sendMessageBotService.missOrderMessage(userChatId));
-        executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
+        if (checkUser(userChatId, step)) {
+            storeUsers.get(userChatId).updateStep(Steps.STEP102);
+            executeMessage(sendMessageBotService.missOrderMessage(userChatId));
+            executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
+        }
 
         return false;
 
