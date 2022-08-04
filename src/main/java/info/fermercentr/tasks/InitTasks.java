@@ -10,6 +10,8 @@ import info.fermercentr.config.Config;
 import info.fermercentr.service.CheckOrdersTimeExpired;
 import info.fermercentr.service.DeleteTempFilesOrders;
 
+import static info.fermercentr.App.BUILD_VERSION;
+
 public class InitTasks {
 
     private static final Logger LOG = LogManager.getLogger(InitTasks.class);
@@ -26,14 +28,16 @@ public class InitTasks {
     }
 
     public void start(final StoreUsers storeUsers, final StoreOrders storeOrders) {
-        LOG.info("******\n[" + Config.APP_NAME + "] - Start scheduled tasks.");
+        LOG.info("[" + Config.APP_NAME + "] ******");
+        LOG.info("[" + Config.APP_NAME + "] - Start scheduled tasks. Building version: " + BUILD_VERSION);
 
         taskSetDivisions();
         taskCheckOrdersTimeExpired(storeOrders);
         taskCheckAllUsersAuth(storeUsers);
         taskDeleteTempFilesFromOrders(storeOrders);
 
-        LOG.info("[" + Config.APP_NAME + "] - End scheduled tasks.\n******");
+        LOG.info("[" + Config.APP_NAME + "] - End scheduled tasks.");
+        LOG.info("[" + Config.APP_NAME + "] ******");
 
     }
 

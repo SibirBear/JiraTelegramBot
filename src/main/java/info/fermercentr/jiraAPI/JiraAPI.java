@@ -241,7 +241,7 @@ public class JiraAPI {
     public int findUserJira(final String user) throws JiraApiException {
         int responseUser = 404;
 
-        HttpGet httpGet = new HttpGet(BASE_URL + JIRA_API_USER + "?key=" + user);
+        HttpGet httpGet = new HttpGet(BASE_URL + JIRA_API_USER + "?key=" + user.trim());
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, CREDENTIALS);
 
         LOG.info("[" + getClass() + "] " + " Trying to connect to Jira API...");

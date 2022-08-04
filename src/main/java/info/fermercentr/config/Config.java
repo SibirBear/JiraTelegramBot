@@ -22,6 +22,7 @@ public class Config {
     private static ConfigTelegramSettings configTelegramSettings;
     private static ConfigOracleDB configOracleDB;
     private static Config config;
+    private static String groupId;
     private static String authJira;
     private static String urlJira;
     private static String pathToExchange;
@@ -37,6 +38,7 @@ public class Config {
         }
         String token = properties.getProperty("TOKEN");
         String botName = properties.getProperty("BOTNAME");
+        groupId = properties.getProperty("GROUP");
         authJira = properties.getProperty("AUTH_JIRA");
         urlJira = properties.getProperty("URL_JIRA");
         pathToExchange = properties.getProperty("PATH_TO_EXCHANGE");
@@ -60,6 +62,10 @@ public class Config {
 
     public static ConfigTelegramSettings getConfigTelegramSettings() {
         return configTelegramSettings;
+    }
+
+    public static String getGroupId() {
+        return groupId;
     }
 
     public static String getAuthJira() {

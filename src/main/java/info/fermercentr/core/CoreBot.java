@@ -61,7 +61,9 @@ public class CoreBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) { // && update.getMessage().hasText()
+        if (update.hasMessage()
+                && !Config.getGroupId()
+                .equals(String.valueOf(update.getMessage().getChatId()))) { // && update.getMessage().hasText()
             if (START.equals(update.getMessage().getText())) {
                 executeMessage(sendMessageBotService.startMessage(update.getMessage().getChatId()));
             }
@@ -141,7 +143,7 @@ public class CoreBot extends TelegramLongPollingBot {
                 executeMessage(sendMessageBotService.awaitingMessage(userChatId));
 
                 LOG.info("[" + getClass() + "] " + userChatId
-                        + " " + Steps.STEP101 + " - Authorization: " + loginUser);
+                        + " " + Steps.STEP101 + " - Authorization login: " + loginUser);
 
                 int result;
                 try {
@@ -203,7 +205,7 @@ public class CoreBot extends TelegramLongPollingBot {
                         storeUsers.get(userChatId).updateStep(Steps.STEP102);
 
                         executeMessage(sendMessageBotService.listOfIssues(userChatId, listIssues));
-                        executeMessage(sendMessageBotService.listOfIssuesEnd(userChatId));
+                        executeMessage(sendMessageBotService.returnToPrimaryMenu(userChatId));
                         executeMessage(sendMessageBotService.primaryMenuMessage(userChatId));
                     } catch (JiraApiException e) {
                         LOG.error("[" + getClass() + "] " + "ERROR! " + userChatId
@@ -404,6 +406,9 @@ public class CoreBot extends TelegramLongPollingBot {
                     }
 
                     LOG.info("[" + getClass() + "] " + userChatId + " STEP127 - Issue: " + storeOrders.get(userChatId).toString());
+
+                    executeMessage(sendMessageBotService
+                            .messageToAnotherGroup_CreatingMsg(Config.getGroupId(), getUrl(key)));
                     executeMessage(sendMessageBotService.messageEndCreatingIssue(userChatId, getUrl(key)));
 
                 } catch (JiraApiException e) {
@@ -454,6 +459,7 @@ public class CoreBot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
+            LOG.error("[" + getClass() + "] Error with sending message " + sendMessage.getText());
             e.printStackTrace();
         }
     }

@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Singleton(name = "Telegram-bot-Jira-Issues")
 public class App {
 
+    public static final String BUILD_VERSION = "04/08/2022 16-30";
     private static final Logger LOG = LogManager.getLogger(App.class);
     private BotSession botSession;
     private CoreBot coreBot;
@@ -42,7 +43,7 @@ public class App {
 
     @PostConstruct
     public void init() {
-        LOG.info("[" + Config.APP_NAME + "] - Starting application (build 01/07/2022 18-00)...");
+        LOG.info("[" + Config.APP_NAME + "] - Starting application (build " + BUILD_VERSION + ")...");
         LOG.info("[" + Config.APP_NAME + "] - Trying to init Configuration properties...");
         Config.init();
         LOG.info("[" + Config.APP_NAME + "] - Configuration properties are initialized.");

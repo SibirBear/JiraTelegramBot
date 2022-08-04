@@ -1,6 +1,7 @@
 package info.fermercentr.service.bot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import static info.fermercentr.service.bot.SendMessageBuilder.createMessageWithKeyboard;
 import static info.fermercentr.service.bot.SendMessageBuilder.createSimpleMessage;
@@ -155,4 +156,11 @@ public class SendMessageBotService {
                 SendMessageConstantText.RETURN_TO_PRIMARY_MENU_ACTION.getText());
     }
 
+    public SendMessage messageToAnotherGroup_CreatingMsg(String chatId, String url) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText("Только что кто-то создал новую заявку в Жира через чат-бот... Вот ссылка: " + url);
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        return sendMessage;
+    }
 }
